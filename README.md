@@ -388,7 +388,7 @@ MobileNet this variant i s again lightwieght faster but accuracy is  compromised
 
 These are the mostly used object detection models for commercial enterpirse applications , reserach works and medical analysis . and all of them have multiple use case centric vairants having specialization for the specific task. we have discussed them and now just we will make a list of all the possible open source object detection models that are avaiable integration in production grade applications, research and development etc . 
 
-#### Hugging face.
+## Hugging face.
 
 [Hugging Face](https://huggingface.co/) is AI platform that provide tools ,datasets and pre-trained models for Machine learning tasks.it has its wide transformer library that offer multiple ready to use open source models. its called models zoo where you can get any type of model for GenAI, Machine learning ,Computer vision and Natural language processing etc .
 one of its most powerful feature is it provides inference API .which aloows to run models in cloud without setting up local enviroment .just using API for sending request and all the computation will be handled by hugging face . thre are two way to use it 1: free API good for testing and personal use and 2 is paid  plan for large applications and faster responses .
