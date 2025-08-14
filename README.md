@@ -6,10 +6,10 @@ AI is simply ability to think and act like humans.  There are its branches
 Machine Leaning > Deep Learning > Computer Vision. 
  
 
-Machine Leaning: A branch of AI in which machines learn from labelled data patterns instead of fixed rules-based systems . 
+**Machine Leaning**: A branch of AI in which machines learn from labelled data patterns instead of fixed rules-based systems . 
 Three main types of Machine Learning: 
 
-1: Supervised Learning 2: Unsupervised Learning 3: Reinforcement Leaning. 
+**1: Supervised Learning 2: Unsupervised Learning 3: Reinforcement Leaning.**
 
 Deep Learning: Its branch of machine learning that is  based on the special type of neural networks that learns complex patterns from data.it mainly falls under supervised learning where models are trained on labeled datasets to learn hte mapping between inputs and outputs.
 one of the special branch of deep learing is Computer vision that uses Convolutional Neural Networks to learn complex patterns from data and perform predictions in different enviroment efficiently in real time deployments as well .in computer vision, images are processed to extract meaningful features, which can then be used for various tasks such as classification, segmentation, and one of the most important applications—object detection, where models not only recognize objects but also locate them within the image.in this guide we will deeply learn about object detection.
@@ -390,3 +390,38 @@ These are the mostly used object detection models for commercial enterpirse appl
 
 #### Hugging face.
 
+[Hugging Face](https://huggingface.co/) is AI platform that provide tools ,datasets and pre-trained models for Machine learning tasks.it has its wide transformer library that offer multiple ready to use open source models. its called models zoo where you can get any type of model for GenAI, Machine learning ,Computer vision and Natural language processing etc .
+one of its most powerful feature is it provides inference API .which aloows to run models in cloud without setting up local enviroment .just using API for sending request and all the computation will be handled by hugging face . thre are two way to use it 1: free API good for testing and personal use and 2 is paid  plan for large applications and faster responses .
+example to use hugging face APi fopr inferene.
+```python
+import os
+from huggingface_hub import InferenceClient
+
+client = InferenceClient(
+    provider="hf-inference",
+    api_key=os.environ["HF_TOKEN"],
+)
+
+output = client.image_segmentation("cats.jpg", model="facebook/mask2former-swin-base-coco-panoptic")
+
+```
+
+### **Transformers**
+Transformers are type of deep learing architectures designed to handle sequential data using self-attention mechansims instead of traditional or convolution.They excel at capturing long-range dependencies in data. unlike older approaches that process sequences step by step ,transformers compute realtionships between all elements in  asequnce simultaneously,allowing them to capture lng-range dependencies.for our context we have to focus on Vits(vision transformers)
+
+**Computer vision transformers** they adapt this architecture to computer vision by splitting an image into small patches, treating each patch like word in a sentence and applying same attention mechanism to learn how differnet parts of the image relate to each other . mainly used for image-to-text,text-to-image transformers fo generating captions and images .
+
+**Vit(Vision transformer)** The first pure transformer for image classification, treating images as sequence of pathes not as pixels.
+[Vits](https://huggingface.co/google/vit-base-patch16-224-in21k);Hugging-Face.
+
+
+**Swin-Transformer** It uses shifted window attention mechanism for efficient scaling to high-resolution images ,it excels in segmentation,detection and calssification.
+[swin](https://huggingface.co/keras-io/swin-transformers)
+
+**BLIP/BLIP-2** A Vision language model for tasks like image captioning, VQA(visual Question nswering)and retrieval.it takes images as input and generate its caption by defining whats happeining inside the image.BLIP-2 improves teh efficiency by using pre-trained language models for better reasoning over visual inputs. pathces understanding goes to languages models and then they generate accurate caption.
+[Blip](https://huggingface.co/Salesforce/blip2-flan-t5-xxl)
+
+**Florence** Large scale vision foundation model for various  multimodel vision-language applciations. it supports takss such as image-text amtching,captioning in enterpirse and real-world production grade deployments.
+[florence](https://huggingface.co/microsoft/Florence-2-base)
+
+**Note**: Models like ViT, Swin-Transformer, BLIP/BLIP-2, and Florence are not ideal for real-time object detection on RTSP streams. They are mainly designed for high-accuracy image classification, vision-language tasks, and image captioning. These models typically require high-end GPUs with substantial memory (≥16 GB VRAM) for inference and fine-tuning, and are generally unsuitable for CPU-only or edge deployments.
