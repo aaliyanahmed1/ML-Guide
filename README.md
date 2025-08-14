@@ -80,7 +80,9 @@ Every model has its own specific annotation format for reading labels.so the ann
 
 YOLO models use TXT file as label file containing the (class+bounding boxes x ,y coordinates ) for each image file and names of  both files image and label file should be exact same at all  
 like eg : “ Image-1.jpg = image-1.txt” 
+
 ![Yolo format lables file](/images/yololabel.png)
+
 
 ****Detectron2, Faster R-CNN (PyTorch), Mask R-CNN (PyTorch), RF-DETR.****  
 
