@@ -105,7 +105,7 @@ Here you can select the  model format .
 ![](/images/format.png)
 
 
-##### Dataset collection
+### Dataset collection
 
 Now comes the main part that where to find and get the dataset to train model , so the universal platform where multiple datasets are available is 
 [Kaggkle](https://www.kaggle.com/). its widely used and most of teh general datasets are avaiable on it for free.( check for the license of usage for each).
