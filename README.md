@@ -437,12 +437,8 @@ Transformers are type of deep learing architectures designed to handle sequentia
 - **YOLOv4**  
   Balanced speed and accuracy; highly optimized for real-time detection tasks.  
   **Speed:** ~65 FPS (V100)  
-  **Accuracy:** ~43.5% AP (COCO)
-
-- **Scaled-YOLOv4 (Large)**  
-  A scaled-up version of YOLOv4 designed for better accuracy at moderate speed.  
-  **Speed:** ~16 FPS (V100)  
-  **Accuracy:** ~55.5% AP (COCO)
+  **Accuracy:** ~43.5% AP (COCO-dataset)
+  [Yolov4Tiny](https://huggingface.co/gbahlnxp/yolov4tiny)
 
 - **YOLOv7**  
   State-of-the-art real-time detection model with top-tier accuracy.  
