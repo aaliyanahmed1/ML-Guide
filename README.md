@@ -428,4 +428,59 @@ Transformers are type of deep learing architectures designed to handle sequentia
 **Florence** Large scale vision foundation model for various  multimodel vision-language applciations. it supports takss such as image-text amtching,captioning in enterpirse and real-world production grade deployments.
 [florence](https://huggingface.co/microsoft/Florence-2-base)
 
-**Note**: Models like ViT, Swin-Transformer, BLIP/BLIP-2, and Florence are not ideal for real-time object detection on RTSP streams. They are mainly designed for high-accuracy image classification, vision-language tasks, and image captioning. These models typically require high-end GPUs with substantial memory (≥16 GB VRAM) for inference and fine-tuning, and are generally unsuitable for CPU-only or edge deployments.
+**Note**:These models like ViT, Swin-Transformer, BLIP/BLIP-2, and Florence are not ideal for real-time object detection on RTSP streams. They are mainly designed for high-accuracy image classification, vision-language tasks, and image captioning. These models typically require high-end GPUs with substantial memory (≥16 GB VRAM) for inference and fine-tuning, and are generally unsuitable for CPU-only or edge deployments.
+
+### Models from Hugging Face 
+
+**Models for Object detection:**
+
+- **YOLOv4**  
+  Balanced speed and accuracy; highly optimized for real-time detection tasks.  
+  **Speed:** ~65 FPS (V100)  
+  **Accuracy:** ~43.5% AP (COCO)
+
+- **Scaled-YOLOv4 (Large)**  
+  A scaled-up version of YOLOv4 designed for better accuracy at moderate speed.  
+  **Speed:** ~16 FPS (V100)  
+  **Accuracy:** ~55.5% AP (COCO)
+
+- **YOLOv7**  
+  State-of-the-art real-time detection model with top-tier accuracy.  
+  **Speed:** 30–160 FPS  
+  **Accuracy:** ~56.8% AP (30+ FPS)
+
+- **YOLOv10-S**  
+  The newest YOLO generation, highly efficient and extremely fast.  
+  **Speed:** ~1.8× faster than RT-DETR-R18  
+  **Accuracy:** Comparable to YOLOv9
+
+- **SSD (Single-Shot Detector)**  
+  Lightweight single-stage detector suitable for real-time applications.  
+  **Speed:** ~58 FPS  
+  **Accuracy:** ~72.1% (Pascal VOC)
+
+- **EfficientDet (D0–D7)**  
+  Scalable and efficient detectors with excellent COCO performance.  
+  **Speed:** 30–50 FPS (varies by variant)  
+  **Accuracy:** Up to ~55.1% AP (COCO)
+
+- **Faster R-CNN**  
+  Two-stage model known for high precision but slower than single-stage detectors.  
+  **Speed:** ~15 FPS  
+  **Accuracy:** Very high
+
+- **RetinaNet**  
+  One-stage detector with Focal Loss to handle class imbalance effectively.  
+  **Speed:** ~30 FPS  
+  **Accuracy:** High
+
+- **RT-DETR (R50)**  
+  Real-Time DETR optimized for fast inference.  
+  **Speed:** Comparable to YOLO  
+  **Accuracy:** Good overall performance
+
+- **DI-TR (ditr-e15)**  
+  Efficient transformer-based detector with improved detection quality.  
+  **Speed:** Moderate  
+  **Accuracy:** High
+
