@@ -1,6 +1,6 @@
 # Machine Learning hands on Guide
 
-Hi , in this guide we are going to deeply dive into machine learning’s fundamental concepts to core advance frameworks, model selection, benchmarking, fine-tuning and custom training and so on. From prototyping to production level real-time. deployments, from computer systems /servers to edge devices cross platform deployments. This guide will cover all the topics that are essentially needed to become zero-to-hero in Machine learning. In this documentation we will be focusing mainly on the object detection branch hat belongs to Deep learning . 
+Hi , in this guide we are going to deeply learn about machine learning’s fundamental concepts to core advance frameworks, model selection, benchmarking, fine-tuning and custom training and so on. From prototyping to production level real-time. deployments, from computer systems /servers to edge devices cross platform deployments. This guide will cover all the topics that are essentially needed to become zero-to-hero in Machine learning. In this documentation we will be focusing mainly on the object detection branch hat belongs to Deep learning . 
  
 AI is simply ability to think and act like humans.  There are its branches  
 Machine Leaning > Deep Learning > Computer Vision. 
