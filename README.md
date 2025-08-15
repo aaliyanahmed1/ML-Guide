@@ -433,22 +433,21 @@ Transformers are type of deep learing architectures designed to handle sequentia
 ### Models from Hugging Face 
 
 **Models for Object detection:**
-
+[Object detection models on hugging face](https://huggingface.co/models?pipeline_tag=object-detection&sort=trending)
 - **YOLOv4**  
   Balanced speed and accuracy; highly optimized for real-time detection tasks.  
   **Speed:** ~65 FPS (V100)  
   **Accuracy:** ~43.5% AP (COCO-dataset)
   [Yolov4Tiny](https://huggingface.co/gbahlnxp/yolov4tiny)
 
+  **Yolos-Tiny**
+   
+  [yolos-tiny](https://huggingface.co/hustvl/yolos-tiny)
 - **YOLOv7**  
   State-of-the-art real-time detection model with top-tier accuracy.  
   **Speed:** 30–160 FPS  
   **Accuracy:** ~56.8% AP (30+ FPS)
-
-- **YOLOv10-S**  
-  The newest YOLO generation, highly efficient and extremely fast.  
-  **Speed:** ~1.8× faster than RT-DETR-R18  
-  **Accuracy:** Comparable to YOLOv9
+   [Yolov7](https://huggingface.co/kadirnar/yolov7-tiny-v0.1)
 
 - **SSD (Single-Shot Detector)**  
   Lightweight single-stage detector suitable for real-time applications.  
@@ -480,3 +479,8 @@ Transformers are type of deep learing architectures designed to handle sequentia
   **Speed:** Moderate  
   **Accuracy:** High
 
+### Deployment
+Deployment is very typical part of every Machine learning workflow.when it comes to deployment maintaining fps for real-time systems becoems nightmare of MLOps architects so thats why the universal way to deploy model and maintain performance is to decouple it from training framework, that simplifis and reduces down burden of heavy dependencies and speed up the process is exporting model in ONNX(Open Neural Network Exchange) format.this simplifies integration of model and makes it compatible.
+
+#### **ONNX** 
+ Its is an open standard format for representing machine learning models. Exporting models to ONNX decouples them from the original training framework, making them easier to integrate into different platforms, whether on a server, multiple edge devices, or in the cloud. It ensures compatibility across various tools and allows optimized inference on different hardware setups, helping maintain real-time performance.
