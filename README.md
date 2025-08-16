@@ -679,7 +679,7 @@ from onnxruntime.tools import onnx_pruning
 # ---------------------------
 # Step 1: Define paths
 # ---------------------------
-onnx_model_path = "rfdetr_small.onnx"          # Your existing ONNX model
+onnx_model_path = "rfdetr_small.onnx"          # existing ONNX model
 pruned_model_path = "rfdetr_small_pruned.onnx" # Path for pruned model
 quantized_model_path = "rfdetr_small_pruned_int8.onnx"  # Path for INT8 quantized model
 
