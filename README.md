@@ -477,6 +477,45 @@ Deployment is very typical part of every Machine learning workflow.when it comes
 
 #### **ONNX** 
  Its is an open standard format for representing machine learning models. Exporting models to ONNX decouples them from the original training framework, making them easier to integrate into different platforms, whether on a server, multiple edge devices, or in the cloud. It ensures compatibility across various tools and allows optimized inference on different hardware setups, helping maintain real-time performance.
+ 
+```python
+# export_rfdetr_onnx.py
+import torch
+from rfdetr import RFDETRSmall  # Choose RFDETRBase/Medium/Small
+
+# ---------------------------
+# Step 1: Load pretrained RF-DETR model
+# ---------------------------
+model = RFDETRSmall()
+model.eval()  # Set to evaluation mode
+
+# ---------------------------
+# Step 2: Create dummy input
+# ---------------------------
+# Shape: [batch_size, 3, H, W] → match model's expected input
+dummy_input = torch.randn(1, 3, 800, 800)
+
+# ---------------------------
+# Step 3: Export to ONNX
+# ---------------------------
+torch.onnx.export(
+    model,                       # PyTorch model
+    dummy_input,                 # Example input tensor
+    "rfdetr_small.onnx",         # Output ONNX file
+    input_names=["input"],       # Input node name
+    output_names=["logits", "boxes"],  # Output node names
+    dynamic_axes={               # Allow variable batch size & image dimensions
+        "input": {0: "batch", 2: "height", 3: "width"},
+        "logits": {0: "batch"},
+        "boxes": {0: "batch"},
+    },
+    opset_version=17,            # ONNX opset
+    do_constant_folding=True,    # Optimize constants
+    verbose=True
+)
+
+print("✅ RF-DETR Small exported to rfdetr_small.onnx")
+```
 
 #### **Onxruntime**
  is a high-performance inference engine designed to run ONNX modles efficiently accross different platforms.it takes the ONNX model and applies grapgh optimization,operator fusion and quantizations to reduce memory usage and computation time .so models run faster on servers,cloud enviroments and on multiple edge devices without needing original training framework.it can also speedup training process of large models by just making simple changes in code it can make training faster and effcient without changing workflow too much.  
@@ -521,7 +560,7 @@ print("✅ ONNX model loaded with graph optimization enabled!")
 ```
 
 **Operator Fusion:** This function merges multiple small operations into a single, more efficient operation to reduce processing overhead. 
-fusing cnv+ BtachNorm + ReLU into one step.it reduces number of kernels launches on CPU\GPU.that spped up inference and lowers memory overhead. it happens automaticallyu when grapgh optimzation is enable=True.
+fusing cnv+ BtachNorm + ReLU into one step.it reduces number of kernels launches on CPU\GPU.that spped up inference and lowers memory overhead. it happens automatically when grapgh optimzation is enable=True.
 
 ```python
 import onnx
@@ -555,12 +594,41 @@ fused_model.save_model_to_file(fused_model_path)
 # 3. Works together with graph optimization for maximum inference speed.
 # ---------------------------
 print(f"✅ Operator fusion applied! Fused model saved at {fused_model_path}")
-
-
 ```
+
 **Quantization:** It converts high-precision numbers(floating point32) into lower precision(INT8) to reduce memory and improve speed with minimal accuracy loss. compressing weights from 32 floating point to 8-bit integers.Quantization includes several advanced techniques beong simple dyunamuc int8 quantization .lets discuss them one-by-one .
 
 **1: Dynamic Quantization** It Converts weights only to INT* during runtime .activation functions ( sigmoid,Relu etc) remains same FP#@.its fast adn easy and no need for training again and again for updates like that. ideal where all of the workflow is deployed on CPU .
+```python
+import onnx
+from onnxruntime.quantization import quantize_dynamic, QuantType
+
+# ---------------------------
+# Step 1: Define paths
+# ---------------------------
+onnx_model_path = "model.onnx"          # Original FP32 ONNX model
+quantized_model_path = "model_int8.onnx" # Path to save INT8 quantized model
+
+# ---------------------------
+# Step 2: Apply Dynamic Quantization
+# ---------------------------
+# Converts weights (FP32 → INT8) for selected ops (e.g., MatMul, GEMM, Attention)
+quantize_dynamic(
+    model_input=onnx_model_path,
+    model_output=quantized_model_path,
+    weight_type=QuantType.QInt8  # Quantize weights to INT8
+)
+
+# ---------------------------
+# Step 3: ✅ Explanation
+# ---------------------------
+# 1. Reduces model size (weights now INT8).
+# 2. Faster CPU inference (uses INT8 optimized kernels in ONNX Runtime).
+# 3. No retraining required – works directly on exported ONNX model.
+# ---------------------------
+print(f"✅ Dynamic Quantization applied! Quantized model saved at {quantized_model_path}")
+
+```
 
 **2:Mixed Precision/Fp16 Quantization** this reduces precision from FP32 to FP16 often used on hardware with GPUs to speed inference while keeping accuracy close to full precision yet speeding up the process.
 
