@@ -477,7 +477,7 @@ Deployment is very typical part of every Machine learning workflow.when it comes
 
 #### **ONNX** 
  Its is an open standard format for representing machine learning models. Exporting models to ONNX decouples them from the original training framework, making them easier to integrate into different platforms, whether on a server, multiple edge devices, or in the cloud. It ensures compatibility across various tools and allows optimized inference on different hardware setups, helping maintain real-time performance.
- 
+
 ```python
 # export_rfdetr_onnx.py
 import torch
@@ -632,4 +632,82 @@ print(f"✅ Dynamic Quantization applied! Quantized model saved at {quantized_mo
 
 **2:Mixed Precision/Fp16 Quantization** this reduces precision from FP32 to FP16 often used on hardware with GPUs to speed inference while keeping accuracy close to full precision yet speeding up the process.
 
+```python
+import onnx
+from onnxconverter_common import float16
+
+# ---------------------------
+# Step 1: Define paths
+# ---------------------------
+onnx_model_path = "rfdetr_small.onnx"          # Original FP32 ONNX model
+fp16_model_path = "rfdetr_small_fp16.onnx"    # Path to save FP16 model
+
+# ---------------------------
+# Step 2: Load the ONNX model
+# ---------------------------
+model = onnx.load(onnx_model_path)
+
+# ---------------------------
+# Step 3: Convert model weights to FP16
+# ---------------------------
+# float16 conversion reduces memory usage and speeds up GPU inference
+fp16_model = float16.convert_float_to_float16(model)
+
+# ---------------------------
+# Step 4: Save the FP16 ONNX model
+# ---------------------------
+onnx.save(fp16_model, fp16_model_path)
+
+# ---------------------------
+# ✅ Explanation:
+# 1. Converts FP32 weights to FP16 for GPU acceleration.
+# 2. Reduces model memory footprint by ~50%.
+# 3. Maintains accuracy close to FP32 (slight precision loss possible).
+# 4. Best used with GPU runtime; CPUs do not benefit much.
+# ---------------------------
+print(f"✅ FP16 Mixed Precision applied! Model saved at {fp16_model_path}")
+
+```
+
 **3:Pruning + Quantization** pruning removes unimportant weoghts usually small-magnitude from th network reduces models size and computations which increease FPS in real-time.
+
+```python
+import onnx
+from onnxruntime.quantization import quantize_dynamic, QuantType
+from onnxruntime.tools import onnx_pruning
+
+# ---------------------------
+# Step 1: Define paths
+# ---------------------------
+onnx_model_path = "rfdetr_small.onnx"          # Your existing ONNX model
+pruned_model_path = "rfdetr_small_pruned.onnx" # Path for pruned model
+quantized_model_path = "rfdetr_small_pruned_int8.onnx"  # Path for INT8 quantized model
+
+# ---------------------------
+# Step 2: Prune unimportant weights
+# ---------------------------
+# Using ONNX Runtime pruning tool (magnitude-based)
+# Removes low-magnitude weights to reduce model size
+pruned_model = onnx_pruning.prune_model(
+    model_path=onnx_model_path,
+    prune_ratio=0.2,           # Remove 20% of small-magnitude weights
+    output_model_path=pruned_model_path
+)
+
+# ---------------------------
+# Step 3: Apply dynamic INT8 quantization
+# ---------------------------
+quantize_dynamic(
+    model_input=pruned_model_path,
+    model_output=quantized_model_path,
+    weight_type=QuantType.QInt8
+)
+
+# ---------------------------
+# ✅ Explanation:
+# 1. Pruning reduces unnecessary weights → fewer computations, faster inference.
+# 2. Dynamic INT8 quantization reduces model size and speeds up CPU inference.
+# 3. The final ONNX model is optimized for real-time deployment.
+# ---------------------------
+print(f"✅ Pruned + Quantized ONNX model saved at {quantized_model_path}")
+```
