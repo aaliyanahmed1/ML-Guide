@@ -345,7 +345,7 @@ RF-DETR base is ideal for server inferences for real-time application deployment
 RF-DETR Large is  heavy-weight modle best for high accuracies on GPUs .ideal touse where accuracy is more cruicial then speed . not ideal for realtime systems.
 [RF-DETR-large](https://github.com/aaliyanahmed1/rf-detr/blob/master/rfdetrlarge.py).
 
-For training RF-DETR on custom dataset first preprocess the dataset using ROoboflow and then downlod it accordding to the Rf-DETR format by selecting foramt in roboflow then feed it into the code and then start training bu defining which model you want to train .lets have an hands on example of it at all. [Train RF-DETR](https://github.com/aaliyanahmed1/rf-detr/blob/master/train_rfdetr.py).
+For training RF-DETR on custom dataset first preprocess the dataset using ROoboflow and then downlod it accordding to the Rf-DETR format by selecting foramt in roboflow then feed it into the code and then start training bu defining which model you want to train .lets have an hands on example of it at all. [FiNE-TUNE_RF-DETR](https://github.com/aaliyanahmed1/rf-detr/blob/master/train_rfdetr.py).
 
 
 2:**YOLO** by [ultralytics](https://www.ultralytics.com/) commonly used model throughout best fit for real-time applications and fast easy to finetune .it takes image of 640x640 pixels as standard input.but its not under apache2.0 license so it cant be used freely for commercial applications.you have to pay to the company .
