@@ -524,6 +524,37 @@ print("✅ ONNX model loaded with graph optimization enabled!")
 fusing cnv+ BtachNorm + ReLU into one step.it reduces number of kernels launches on CPU\GPU.that spped up inference and lowers memory overhead. it happens automaticallyu when grapgh optimzation is enable=True.
 
 ```python
+import onnx
+from onnxruntime.transformers.optimizer import optimize_model
+
+# ---------------------------
+# Step 1: Define paths for models
+# ---------------------------
+onnx_model_path = "model.onnx"              # Original ONNX model
+fused_model_path = "model_fused.onnx"       # Path to save operator-fused model
+
+# ---------------------------
+# Step 2: Apply Operator Fusion
+# ---------------------------
+# Operator fusion merges multiple operations into a single, more efficient operation
+# Example: Conv + BatchNorm + ReLU → single fused operator
+# This reduces kernel launches on GPU/CPU and improves inference speed
+# The 'model_type' parameter can be adjusted if using a transformer-like model.
+# For general vision models like RF-DETR, using "rf-detr" or "generic" is appropriate.
+fused_model = optimize_model(onnx_model_path, model_type="rf-detr")
+
+# ---------------------------
+# Step 3: Save the fused model
+# ---------------------------
+fused_model.save_model_to_file(fused_model_path)
+
+# ---------------------------
+# ✅ Explanation:
+# 1. Operator Fusion improves runtime by combining adjacent operations.
+# 2. It reduces computation overhead and memory usage.
+# 3. Works together with graph optimization for maximum inference speed.
+# ---------------------------
+print(f"✅ Operator fusion applied! Fused model saved at {fused_model_path}")
 
 
 ```
