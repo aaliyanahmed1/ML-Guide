@@ -477,7 +477,7 @@ Deployment is very typical part of every Machine learning workflow.when it comes
 
 #### **ONNX** 
  Its is an open standard format for representing machine learning models. Exporting models to ONNX decouples them from the original training framework, making them easier to integrate into different platforms, whether on a server, multiple edge devices, or in the cloud. It ensures compatibility across various tools and allows optimized inference on different hardware setups, helping maintain real-time performance.
-here is simple minimal code implementation to export model that is in its training framework to export it ot ONNX format for cross-platofrm integration and further optimization.
+here is simple minimal code implementation to export model that is in its training framework to export it ot ONNX format for cross-platofrm integration and further optimizations.
 
 ```python
 # export_rfdetr_onnx.py
