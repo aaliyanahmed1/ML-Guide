@@ -489,9 +489,25 @@ Deployment is very typical part of every Machine learning workflow.when it comes
 **Graph Optimization:** IT rearranges and simplifies the model's performance computation graph to remov unnecassary steps, making it run faster.like combining adjacent layers or removing unused nodes.
 
 **Operator Fusion:** This function merges multiple small operations into a single, more efficient operation to reduce processing overhead. 
-fusing cnv+ BtachNorm + ReLU into one step.
+fusing cnv+ BtachNorm + ReLU into one step.it reduces number of kernels launches on CPU\GPU.that spped up inference and lowers memory overhead. it happens automaticallyu when grapgh optimzation is enable=True.
 
-**Quantization:** It converts high-precision numbers(floating point32) into lower precision(INT8) to reduce memory and improve speed with minimal accuracy loss. compressing weights from 32 floating point to 8-bit integers.Quantization includes several advanced techniques beong simple dyunamuc int8 quantization .lets discuss them one-by-one there use cases and where they are needed and why.
+```python
+import onnxruntime as ort
+
+# Create session options
+session_options = ort.SessionOptions()
+
+# Set graph optimization level
+# ORT_ENABLE_BASIC: Applies basic optimizations (lightweight, safe)
+# ORT_ENABLE_EXTENDED: Applies more optimizations including some operator fusions
+# ORT_ENABLE_ALL: Applies all available optimizations including aggressive fusions and node eliminations
+session_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+
+# Load ONNX model with the chosen optimization level
+session = ort.InferenceSession("model.onnx", sess_options=session_options)
+
+```
+**Quantization:** It converts high-precision numbers(floating point32) into lower precision(INT8) to reduce memory and improve speed with minimal accuracy loss. compressing weights from 32 floating point to 8-bit integers.Quantization includes several advanced techniques beong simple dyunamuc int8 quantization .lets discuss them one-by-one .
 
 **1: Dynamic Quantization** It Converts weights only to INT* during runtime .activation functions ( sigmoid,Relu etc) remains same FP#@.its fast adn easy and no need for training again and again for updates like that. ideal where all of the workflow is deployed on CPU .
 
