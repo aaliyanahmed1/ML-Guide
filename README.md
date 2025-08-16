@@ -478,7 +478,7 @@ Deployment is very typical part of every Machine learning workflow.when it comes
 #### **ONNX** 
  Its is an open standard format for representing machine learning models. Exporting models to ONNX decouples them from the original training framework, making them easier to integrate into different platforms, whether on a server, multiple edge devices, or in the cloud. It ensures compatibility across various tools and allows optimized inference on different hardware setups, helping maintain real-time performance.
 
-##### **Onxruntime**
+#### **Onxruntime**
  is a high-performance inference engine designed to run ONNX modles efficiently accross different platforms.it takes the ONNX model and applies grapgh optimization,operator fusion and quantizations to reduce memory usage and computation time .so models run faster on servers,cloud enviroments and on multiple edge devices without needing original training framework.it can also speedup training process of large models by just making simple changes in code it can make training faster and effcient without changing workflow too much.  
 
 
