@@ -487,7 +487,6 @@ Deployment is very typical part of every Machine learning workflow.when it comes
 
 ##### **Onxruntime**
  is a high-performance inference engine designed to run ONNX modles efficiently accross different platforms.it takes the ONNX model and applies grapgh optimization,operator fusion and quantizations to reduce memory usage and computation time .so models run faster on servers,cloud enviroments and on multiple edge devices without needing original training framework.
-
 [Onnxruntime Docs](https://onnxruntime.ai/docs/get-started/with-python.html#install-onnx-runtime)
 
 **Graph Optimization:** IT rearranges and simplifies the model's performance computation graph to remov unnecassary steps, making it run faster.like combining adjacent layers or removing unused nodes.
