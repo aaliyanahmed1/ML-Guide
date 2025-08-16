@@ -480,7 +480,7 @@ Deployment is very typical part of every Machine learning workflow.when it comes
 here is simple minimal code implementation to export model that is in its training framework to export it ot ONNX format for cross-platofrm integration and further optimizations.
 
 ```python
-# export_rfdetr_onnx.py
+
 import torch
 from rfdetr import RFDETRSmall  # Choose RFDETRBase/Medium/Small
 
