@@ -432,7 +432,7 @@ Transformers are type of deep learing architectures designed to handle sequentia
 
 ### Models from Hugging Face 
 
-**Models for Object detection:**
+**Models for Object detection with high speed:**
 [Object detection models on hugging face](https://huggingface.co/models?pipeline_tag=object-detection&sort=trending)
 - **YOLOv4**  
   Balanced speed and accuracy; highly optimized for real-time detection tasks.  
@@ -458,26 +458,19 @@ Transformers are type of deep learing architectures designed to handle sequentia
   Scalable and efficient detectors with excellent COCO performance.  
   **Speed:** 30–50 FPS (varies by variant)  
   **Accuracy:** Up to ~55.1% AP (COCO)
-
-- **Faster R-CNN**  
-  Two-stage model known for high precision but slower than single-stage detectors.  
-  **Speed:** ~15 FPS  
-  **Accuracy:** Very high
+  [EfficientNet](https://huggingface.co/google/efficientnet-b7).
 
 - **RetinaNet**  
   One-stage detector with Focal Loss to handle class imbalance effectively.  
   **Speed:** ~30 FPS  
   **Accuracy:** High
+[RetinaNet](https://huggingface.co/keras-io/Object-Detection-RetinaNet).
 
 - **RT-DETR (R50)**  
   Real-Time DETR optimized for fast inference.  
-  **Speed:** Comparable to YOLO  
+  **Speed:** 35 Fps 
   **Accuracy:** Good overall performance
-
-- **DI-TR (ditr-e15)**  
-  Efficient transformer-based detector with improved detection quality.  
-  **Speed:** Moderate  
-  **Accuracy:** High
+[RT-DETR](https://huggingface.co/PekingU/rtdetr_r101vd_coco_o365).
 
 ### Deployment
 Deployment is very typical part of every Machine learning workflow.when it comes to deployment maintaining fps for real-time systems becoems nightmare of MLOps architects so thats why the universal way to deploy model and maintain performance is to decouple it from training framework, that simplifis and reduces down burden of heavy dependencies and speed up the process is exporting model in ONNX(Open Neural Network Exchange) format.this simplifies integration of model and makes it compatible.
@@ -487,12 +480,20 @@ Deployment is very typical part of every Machine learning workflow.when it comes
 
 ##### **Onxruntime**
  is a high-performance inference engine designed to run ONNX modles efficiently accross different platforms.it takes the ONNX model and applies grapgh optimization,operator fusion and quantizations to reduce memory usage and computation time .so models run faster on servers,cloud enviroments and on multiple edge devices without needing original training framework.
+
 [Onnxruntime Docs](https://onnxruntime.ai/docs/get-started/with-python.html#install-onnx-runtime)
+
+[Onnxruntime for training](https://onnxruntime.ai/training).
 
 **Graph Optimization:** IT rearranges and simplifies the model's performance computation graph to remov unnecassary steps, making it run faster.like combining adjacent layers or removing unused nodes.
 
 **Operator Fusion:** This function merges multiple small operations into a single, more efficient operation to reduce processing overhead. 
 fusing cnv+ BtachNorm + ReLU into one step.
 
-**Quantization:** It converts high-precision numbers(floating point32) into lower precision(INT8) to reduce memory and improve speed with minimal accuracy loss. compressing weights from 32 floating point to 8-bit integers.
+**Quantization:** It converts high-precision numbers(floating point32) into lower precision(INT8) to reduce memory and improve speed with minimal accuracy loss. compressing weights from 32 floating point to 8-bit integers.Quantization includes several advanced techniques beong simple dyunamuc int8 quantization .lets discuss them one-by-one there use cases and where they are needed and why.
 
+**1: Dynamic Quantization** It Converts weights only to INT* during runtime .activation functions ( sigmoid,Relu etc) remains same FP#@.its fast adn easy and no need for training again and again for updates like that. ideal where all of the workflow is deployed on CPU .
+
+**2:Mixed Precision/Fp16 Quantization** this reduces precision from FP32 to FP16 often used on hardware with GPUs to speed inference while keeping accuracy close to full precision yet speeding up the process.
+
+**3:Pruning + Quantization** pruning removes unimportant weoghts usually small-magnitude from th network reduces models size and computations which increease FPS in real-time.
