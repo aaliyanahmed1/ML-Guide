@@ -486,25 +486,45 @@ Deployment is very typical part of every Machine learning workflow.when it comes
 
 [Onnxruntime for training](https://onnxruntime.ai/training).
 
-**Graph Optimization:** IT rearranges and simplifies the model's performance computation graph to remov unnecassary steps, making it run faster.like combining adjacent layers or removing unused nodes.
+
+**Graph Optimization:** It rearranges and simplifies the model's performance computation graph to remov unnecassary steps, making it run faster.like combining adjacent layers or removing unused nodes.these all optimizations are automatically applied in ONNx Runtime when session is created with grapgh optimization enabled(oRT_ENABLE_ALL).reduing memory usage and CPU/GPU cycles,helping maintain higher FPS for real time inference 
+
+```python
+import onnxruntime as ort
+
+# ---------------------------
+# Create session options for ONNX Runtime
+# ---------------------------
+session_options = ort.SessionOptions()
+
+# ---------------------------
+# Set graph optimization level
+# ---------------------------
+# ORT_ENABLE_BASIC: Applies basic, safe optimizations like removing unused nodes
+# ORT_ENABLE_EXTENDED: Includes more optimizations such as some operator fusions
+# ORT_ENABLE_ALL: Applies all available optimizations including aggressive fusions and node eliminations
+session_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+
+# ---------------------------
+# Load ONNX model with the chosen optimization level
+# ---------------------------
+session = ort.InferenceSession("model.onnx", sess_options=session_options)
+
+# ---------------------------
+# ✅ Explanation:
+# 1. Creating SessionOptions allows you to configure how the ONNX model runs.
+# 2. Graph optimization automatically rearranges computations, removes unnecessary nodes,
+#    and may combine adjacent operations for faster inference.
+# 3. ORT_ENABLE_ALL is recommended for real-time systems to maximize FPS.
+# ---------------------------
+print("✅ ONNX model loaded with graph optimization enabled!")
+```
 
 **Operator Fusion:** This function merges multiple small operations into a single, more efficient operation to reduce processing overhead. 
 fusing cnv+ BtachNorm + ReLU into one step.it reduces number of kernels launches on CPU\GPU.that spped up inference and lowers memory overhead. it happens automaticallyu when grapgh optimzation is enable=True.
 
 ```python
-import onnxruntime as ort
 
-# Create session options
-session_options = ort.SessionOptions()
-
-# Set graph optimization level
-# ORT_ENABLE_BASIC: Applies basic optimizations (lightweight, safe)
-# ORT_ENABLE_EXTENDED: Applies more optimizations including some operator fusions
-# ORT_ENABLE_ALL: Applies all available optimizations including aggressive fusions and node eliminations
-session_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
-
-# Load ONNX model with the chosen optimization level
-session = ort.InferenceSession("model.onnx", sess_options=session_options)
 
 ```
 **Quantization:** It converts high-precision numbers(floating point32) into lower precision(INT8) to reduce memory and improve speed with minimal accuracy loss. compressing weights from 32 floating point to 8-bit integers.Quantization includes several advanced techniques beong simple dyunamuc int8 quantization .lets discuss them one-by-one .
