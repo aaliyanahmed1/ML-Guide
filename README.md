@@ -712,3 +712,5 @@ quantize_dynamic(
 # ---------------------------
 print(f"✅ Pruned + Quantized ONNX model saved at {quantized_model_path}")
 ```
+
+These optimization techniques are applied during inference to reduce model;s load on memory and remove extra operations and combine small essential operations to make model optimized task centric.this make model more suitable for the operation and reduce computational cost allowing the model to run faster, maintain higher FPS, and respond quickly to incoming data in real-time applications.
