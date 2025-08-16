@@ -484,3 +484,16 @@ Deployment is very typical part of every Machine learning workflow.when it comes
 
 #### **ONNX** 
  Its is an open standard format for representing machine learning models. Exporting models to ONNX decouples them from the original training framework, making them easier to integrate into different platforms, whether on a server, multiple edge devices, or in the cloud. It ensures compatibility across various tools and allows optimized inference on different hardware setups, helping maintain real-time performance.
+
+##### **Onxruntime**
+ is a high-performance inference engine designed to run ONNX modles efficiently accross different platforms.it takes the ONNX model and applies grapgh optimization,operator fusion and quantizations to reduce memory usage and computation time .so models run faster on servers,cloud enviroments and on multiple edge devices without needing original training framework.
+
+[Onnxruntime Docs](https://onnxruntime.ai/docs/get-started/with-python.html#install-onnx-runtime)
+
+**Graph Optimization:** IT rearranges and simplifies the model's performance computation graph to remov unnecassary steps, making it run faster.like combining adjacent layers or removing unused nodes.
+
+**Operator Fusion:** This function merges multiple small operations into a single, more efficient operation to reduce processing overhead. 
+fusing cnv+ BtachNorm + ReLU into one step.
+
+**Quantization:** It converts high-precision numbers(floating point32) into lower precision(INT8) to reduce memory and improve speed with minimal accuracy loss. compressing weights from 32 floating point to 8-bit integers.
+
