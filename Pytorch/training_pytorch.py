@@ -1,12 +1,3 @@
-"""
-training_pytorch.py
-A simplified object detection training script using PyTorch and VOC dataset.
-Key features:
-- Automatic dataset download via torchvision
-- Pre-trained Faster R-CNN model
-- Object detection training pipeline
-"""
-
 import torch
 import torchvision
 from torch.utils.data import DataLoader
