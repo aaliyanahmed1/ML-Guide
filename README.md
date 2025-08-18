@@ -2,9 +2,7 @@
 
 Hi , in this guide we are going to deeply learn about machine learning’s fundamental concepts to core advance frameworks, model selection, benchmarking, fine-tuning and custom training and so on. From prototyping to production level real-time. deployments, from computer systems /servers to edge devices cross platform deployments. This guide will cover all the topics that are essentially needed to become zero-to-hero in Machine learning. In this documentation we will be focusing mainly on the object detection branch hat belongs to Deep learning . 
  
-AI is simply ability to think and act like humans.  There are its branches  
-Machine Leaning > Deep Learning > Computer Vision. 
- 
+AI > Machine Leaning > Deep Learning > Computer Vision. 
 
 **Machine Leaning**: A branch of AI in which machines learn from labelled data patterns instead of fixed rules-based systems . 
 Three main types of Machine Learning: 
@@ -170,9 +168,9 @@ torchvision for computer vision image processing work .it has preloaded datasets
 torchaudio for audio processing and torchtext for natural language processing tasks.
 
 **code implementation example**
-[torch](https://github.com/aaliyanahmed1/Pytorch_/blob/main/torch_.py).
-[torchaudio](https://github.com/aaliyanahmed1/Pytorch_/blob/main/torchaudio_.py).
-[torchvision](https://github.com/aaliyanahmed1/Pytorch_/blob/main/torchvision_.py).
+[torch](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Pytorch/torch_.py).
+[torchaudio](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Pytorch/torchaudio_.py).
+[torchvision](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Pytorch/torchvision_.py).
 
 #### offical documentations of framekwork/refernces.
 [Docs](https://docs.pytorch.org/tutorials/beginner/basics/buildmodel_tutorial.html).
@@ -185,10 +183,10 @@ this documentation covers everything need to define a custom neural network\mode
 Its an open-source framework for building training and deploying AI models it also provide libraries and architecures to build custom neural network/models and also some pre-trained models for inference. pre-loaded datasets post-processing and preprocessing tools for datasets handling .major libraries from tensorflow and there code implementations .
 
 "tensorflow" core library for defining models performing operations and training models.
-[tensorflow](https://github.com/aaliyanahmed1/tensorflow_/blob/main/tensorflow_core.py)
+[tensorflow]([https://github.com/aaliyanahmed1/tensorflow_/blob/main/tensorflow_core.py](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tensorflow_core.py)
 
 tf.keras a high-Level API building and training neural networks easily.
-[tf.keras](https://github.com/aaliyanahmed1/tensorflow_/blob/main/tf_keras.py)
+[tf.keras](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tf_keras.py)
 
 tf.data for loading ,preprocessing and handling dataset.
 [tf.data](https://github.com/aaliyanahmed1/tensorflow_/blob/main/tf_data.py)
