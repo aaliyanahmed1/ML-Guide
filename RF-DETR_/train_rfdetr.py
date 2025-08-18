@@ -1,4 +1,3 @@
-# train_rfdetr_minimal.py
 
 import os
 from rfdetr import RFDETRBase
