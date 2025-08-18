@@ -1,4 +1,4 @@
-# Machine Learning hands on Guide
+[# Machine Learning hands on Guide
 
 Hi , in this guide we are going to deeply learn about machine learning’s fundamental concepts to core advance frameworks, model selection, benchmarking, fine-tuning and custom training and so on. From prototyping to production level real-time. deployments, from computer systems /servers to edge devices cross platform deployments. This guide will cover all the topics that are essentially needed to become zero-to-hero in Machine learning. In this documentation we will be focusing mainly on the object detection branch hat belongs to Deep learning . 
  
@@ -712,3 +712,4 @@ print(f"✅ Pruned + Quantized ONNX model saved at {quantized_model_path}")
 ```
 
 These optimization techniques are applied during inference to reduce model;s load on memory and remove extra operations and combine small essential operations to make model optimized task centric.this make model more suitable for the operation and reduce computational cost allowing the model to run faster, maintain higher FPS, and respond quickly to incoming data in real-time applications.
+](https://github.com/aaliyanahmed1/ML-Guide/blob/main/FasR-CNN_/)
