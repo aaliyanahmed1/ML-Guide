@@ -1,0 +1,9 @@
+torch>=2.0.0
+torchvision>=0.15.0
+transformers>=4.31.0  # Required for RF-DETR support
+pycocotools>=2.0.6
+matplotlib>=3.7.1
+tqdm>=4.65.0
+pillow>=9.5.0
+numpy>=1.24.0
+timm>=0.9.2  # Required for RF-DETR vision models
