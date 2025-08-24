@@ -47,7 +47,7 @@ Model size: models' variants like nano, medium and large and the difference in s
 
 Accuracy metrices : 
 
-1: **Mean Average precision (mAP)**.it evaluates how precisely model detects objects among crowded frames. it measures the acuracy of the model in identifying and localizing objects withan an image. it combines precision( the proportion of correctly identified objects among all predicted objects) and recall( the proportion of correctly identified objects among all the actual objects).it gives a single score that ashows how well model finds objects and how well it avoids falswe positives. a higher mAP measn the model is more reliable and consistent in real-world scenrios. it helps to compare different models.
+1: **Mean Average precision (mAP)**.it evaluates how precisely model detects objects among crowded frames. it measures the acuracy of the model in identifying and localizing objects withan an image. it combines precision( the proportion of correctly identified objects among all predicted objects) and recall( the proportion of correctly identified objects among all the actual objects).it gives a single score that ashows how well model finds objects and how well it avoids false positives. a higher mAP measn the model is more reliable and consistent.it helps to compare different models amd select according to the use case and requirment.
 
 2: Recall The ratio of correctly predicted positive detections t o all actual objects present in the dataset. 
 
@@ -56,6 +56,9 @@ overlap area/total combined area.Higher IOU = better prediction accuracy by the 
 making visible the accuracy of the model. as visible in the image below green box is ground truth actual object area and the red box is predicted area by model so we can see slightly difference in overlapping of the boxes this visibly shows the accuracy of the model.
 
 ![IOU ](/images/IOU__.png)
+
+![IOU_threshold](/images/IOU_THR.png)
+certain threshold is set for predicting the class with accuracy.
 
 These are the steps needs to consider and critically evaluate before selecting finalizing the model for the system. 
 
