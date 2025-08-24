@@ -47,7 +47,7 @@ Model size: models' variants like nano, medium and large and the difference in s
 
 Accuracy metrices : 
 
-1: Mean Average precision (mAP).how precisely model detects objects among crowded frames. And  IoU ) intersection of union) . 
+1: **Mean Average precision (mAP)**.it evaluates how precisely model detects objects among crowded frames. it measures the acuracy of the model in identifying and localizing objects withan an image. it combines precision( the proportion of correctly identified objects among all predicted objects) and recall( the proportion of correctly identified objects among all the actual objects).it gives a single score that ashows how well model finds objects and how well it avoids falswe positives. a higher mAP measn the model is more reliable and consistent in real-world scenrios. it helps to compare different models.
 
 2: Recall The ratio of correctly predicted positive detections t o all actual objects present in the dataset. 
 
