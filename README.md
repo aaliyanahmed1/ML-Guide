@@ -49,7 +49,9 @@ Accuracy metrices :
 
 1: **Mean Average precision (mAP)**.it evaluates how precisely model detects objects among crowded frames. it measures the acuracy of the model in identifying and localizing objects withan an image. it combines precision( the proportion of correctly identified objects among all predicted objects) and recall( the proportion of correctly identified objects among all the actual objects).it gives a single score that ashows how well model finds objects and how well it avoids false positives. a higher mAP measn the model is more reliable and consistent.it helps to compare different models amd select according to the use case and requirment.
 
-2: Recall The ratio of correctly predicted positive detections t o all actual objects present in the dataset. 
+2: **Recall** The ratio of correctly predicted positive detections to all actual objects present.out of all real objects present, ow manydid the model successfully  detect high recall = fewer false negatives . it evaluates the models ability to capture every possible object without missing them.Recall is calculated by dividing true positives by the sum of true positives and false negatives . it ensures that even subtle and partially visible objects are not overlooked.higher recall make the model reliable for the scenerios where missing object is critical like medical imaging and security survellinece deployments.
+
+3 :**Precision** t measures the accuracy of a model’s positive predictions, indicating the proportion of items predicted as positive that were actually correct. It is calculated as True Positives / (True Positives + False Positives). High precision means the model has few false positives. This metric helps you understand how trustworthy your model is when it predicts a specific outcome.
 
 3:**IoU** it measures how much the predicted object bounding box overlaps with the real( ground truths) box.its the ratio between
 overlap area/total combined area.Higher IOU = better prediction accuracy by the model.it compares the difference between  ground truths and predictions.
