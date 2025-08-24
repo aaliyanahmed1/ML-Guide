@@ -55,7 +55,13 @@ Accuracy metrices :
 overlap area/total combined area.Higher IOU = better prediction accuracy by the model.it compares the difference between  ground truths and predictions.
 making visible the accuracy of the model.
 
-![IOU ](/images/IOU_.png) 
+![IOU ](/images/IOU__.png)
+
+![](images\IOU__.png)
+
+![](/images/IOU__#.png)
+
+![](/images/IOU__#.png)
 
 These are the steps needs to consider and critically evaluate before selecting finalizing the model for the system. 
 
