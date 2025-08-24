@@ -57,8 +57,10 @@ making visible the accuracy of the model. as visible in the image below green bo
 
 ![IOU ](/images/IOU__.png)
 
-![IOU_threshold](/images/IOU_THR.png)
 certain threshold is set for predicting the class with accuracy.
+
+![IOU_threshold](/images/IOU_THR.png)
+
 
 These are the steps needs to consider and critically evaluate before selecting finalizing the model for the system. 
 
