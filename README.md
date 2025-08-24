@@ -53,11 +53,9 @@ Accuracy metrices :
 
 3:**IoU** it measures how much the predicted object bounding box overlaps with the real( ground truths) box.its the ratio between
 overlap area/total combined area.Higher IOU = better prediction accuracy by the model.it compares the difference between  ground truths and predictions.
-making visible the accuracy of the model.
+making visible the accuracy of the model. as visible in the image below green box is ground truth actual object area and the red box is predicted area by model so we can see slightly difference in overlapping of the boxes this visibly shows the accuracy of the model.
 
 ![IOU ](/images/IOU__.png)
-
-asfasfasd
 
 These are the steps needs to consider and critically evaluate before selecting finalizing the model for the system. 
 
