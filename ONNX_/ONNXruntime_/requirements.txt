@@ -1,8 +1,10 @@
 # Dependencies for RF-DETR ONNX Conversion
 torch>=2.0.0
 torchvision>=0.15.0
-transformers>=4.31.0
+transformers>=4.35.0  # Updated for RF-DETR support
+rfdetr>=0.1.0  # Dedicated RF-DETR package
+supervision>=0.18.0  # For visualization and annotation
 onnx>=1.14.0
 onnxruntime>=1.15.0
 numpy>=1.24.0
-Pillow>=9.5.0
+pillow>=9.5.0

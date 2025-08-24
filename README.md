@@ -51,7 +51,9 @@ Accuracy metrices :
 
 2: Recall The ratio of correctly predicted positive detections t o all actual objects present in the dataset. 
 
-3:IoU  referrs to detection accuracy by comparing te ground truths(actual objects) present and the detection results . 
+3:**IoU** it measures how much the predicted object bounding box overlaps with the real( ground truths) box its the ratio between
+overlap area/total combined area higher IOU = better prediction accuracy by the model.
+![IOU ](/images/IOU_.png) 
 
 These are the steps needs to consider and critically evaluate before selecting finalizing the model for the system. 
 
@@ -170,9 +172,9 @@ torchvision for computer vision image processing work .it has preloaded datasets
 torchaudio for audio processing and torchtext for natural language processing tasks.
 
 **code implementation example**
-[torch](https://github.com/aaliyanahmed1/Pytorch_/blob/main/torch_.py).
-[torchaudio](https://github.com/aaliyanahmed1/Pytorch_/blob/main/torchaudio_.py).
-[torchvision](https://github.com/aaliyanahmed1/Pytorch_/blob/main/torchvision_.py).
+[torch](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Pytorch/torch_.py).
+[torchaudio](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Pytorch/torchaudio_.py).
+[torchvision](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Pytorch/torchvision_.py).
 
 #### offical documentations of framekwork/refernces.
 [Docs](https://docs.pytorch.org/tutorials/beginner/basics/buildmodel_tutorial.html).
@@ -185,22 +187,22 @@ this documentation covers everything need to define a custom neural network\mode
 Its an open-source framework for building training and deploying AI models it also provide libraries and architecures to build custom neural network/models and also some pre-trained models for inference. pre-loaded datasets post-processing and preprocessing tools for datasets handling .major libraries from tensorflow and there code implementations .
 
 "tensorflow" core library for defining models performing operations and training models.
-[tensorflow](https://github.com/aaliyanahmed1/tensorflow_/blob/main/tensorflow_core.py)
+[tensorflow](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tensorflow_core.py)
 
 tf.keras a high-Level API building and training neural networks easily.
-[tf.keras](https://github.com/aaliyanahmed1/tensorflow_/blob/main/tf_keras.py)
+[tf.keras](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tf_keras.py)
 
 tf.data for loading ,preprocessing and handling dataset.
-[tf.data](https://github.com/aaliyanahmed1/tensorflow_/blob/main/tf_data.py)
+[tf.data](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tf_data.py)
 
 tf.image utilities for image procesing tasks.
-[tf.image](https://github.com/aaliyanahmed1/tensorflow_/blob/main/tf_image.py)
+[tf.image](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tf_image.py)
 tf.audio functions for audio processing tasks.
-[tf.audio](https://github.com/aaliyanahmed1/tensorflow_/blob/main/tf_audio.py)
+[tf.audio](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tf_audio.py)
 tf.text tools for natural language processing .
-[tf.text](https://github.com/aaliyanahmed1/tensorflow_/blob/main/tf_text.py)
+[tf.text](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tf_text.py)
 tensorflow_hub its model zoo of the tensorflow a great repository  for reusable pre-trained models to fine-tune and integrate them directly into the applications.  
-[tensorflow_hub](https://github.com/aaliyanahmed1/tensorflow_/blob/main/tensorflow_hub_.py)
+[tensorflow_hub](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tensorflow_hub_.py)
 
 [Obejct detection with tensorflow](https://www.tensorflow.org/hub/tutorials/tf2_object_detection)
 [inference](https://github.com/aaliyanahmed1/tensorflow_/blob/main/tf2_object_detection.ipynb)
@@ -213,7 +215,7 @@ now lets discuss the main library among all of the above tf.keras that is widely
 KerasHub is a pretrained modeling library that aims to be simple, flexible, and fast. The library provides Keras 3 implementations of popular model architectures, paired with a collection of pretrained checkpoints. Models can be used for both training and inference, on any of the computer vision image processing operations.because of its ready to use API and ready to use models it reduces experimentation time and makingit ideal for prototyping,research and deployments .using it we can easily load models on our custom datasets and fine-tune them for performign specific customs tasks.
 
 This was all about introduction of the framewroks now lets get back to the training .
-[training using tensorflow ](https://github.com/aaliyanahmed1/tensorflow_/edit/main/training.py).this is the sample practical implementation of trainng a model on custom dataset for object detection. 
+[training using tensorflow ](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/training.py).this is the sample practical implementation of trainng a model on custom dataset for object detection. 
 
 ```python
 def download_coco_dataset():
@@ -334,18 +336,18 @@ There are many state of teh art object detection models that can be finetune and
 | RF‑DETR Large  | \~300 MB  | 6.5              |
 
 RF-DETR nano fits for integration in edge devices, mobile apps and real-time applciation where speed is crucial and low-memory is required.
-[RF-DETR-nano](https://github.com/aaliyanahmed1/rf-detr/blob/master/rfdetr-nano.py).
+[RF-DETR-nano](https://github.com/aaliyanahmed1/ML-Guide/blob/main/RF-DETR_/rfdetr-nano.py).
 
 RF-DETR small is slightly bigger but still its fast and good fit for realtime applications and  perofroms best on GPUs.
-[Rf-DETR-small](https://github.com/aaliyanahmed1/rf-detr/blob/master/rfdetr-small.py).
+[Rf-DETR-small](https://github.com/aaliyanahmed1/ML-Guide/blob/main/RF-DETR_/rfdetr-small.py).
 
 RF-DETR base is ideal for server inferences for real-time application deployments.
-[RF-DETR-base](https://github.com/aaliyanahmed1/rf-detr/blob/master/rfdetrbase.py).
+[RF-DETR-base](https://github.com/aaliyanahmed1/ML-Guide/blob/main/RF-DETR_/rfdetrbase.py).
 
 RF-DETR Large is  heavy-weight modle best for high accuracies on GPUs .ideal touse where accuracy is more cruicial then speed . not ideal for realtime systems.
-[RF-DETR-large](https://github.com/aaliyanahmed1/rf-detr/blob/master/rfdetrlarge.py).
+[RF-DETR-large](https://github.com/aaliyanahmed1/ML-Guide/blob/main/RF-DETR_/rfdetrlarge.py).
 
-For training RF-DETR on custom dataset first preprocess the dataset using ROoboflow and then downlod it accordding to the Rf-DETR format by selecting foramt in roboflow then feed it into the code and then start training bu defining which model you want to train .lets have an hands on example of it at all. [FiNE-TUNE_RF-DETR](https://github.com/aaliyanahmed1/rf-detr/blob/master/train_rfdetr.py).
+For training RF-DETR on custom dataset first preprocess the dataset using ROoboflow and then downlod it accordding to the Rf-DETR format by selecting foramt in roboflow then feed it into the code and then start training bu defining which model you want to train .lets have an hands on example of it at all. [FiNE-TUNE_RF-DETR](https://github.com/aaliyanahmed1/ML-Guide/blob/main/RF-DETR_/train_rfdetr.py).
 
 
 2:**YOLO** by [ultralytics](https://www.ultralytics.com/) commonly used model throughout best fit for real-time applications and fast easy to finetune .it takes image of 640x640 pixels as standard input.but its not under apache2.0 license so it cant be used freely for commercial applications.you have to pay to the company .
@@ -358,18 +360,18 @@ For training RF-DETR on custom dataset first preprocess the dataset using ROobof
 
 
 Yolo12n is ultralight and its optimized ofr edge devices dn real-time inferneces can be used in applications where spped is required and hardware is small.
-[yolo12n_code](https://github.com/aaliyanahmed1/yolo/blob/main/yolo12n_.py).
+[yolo12n_code](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Yolo_/YOLOS_/yolo12n_.py).
 
 Yolo12s is balanced with speed and accuracy performs well comparatively nano variant when integrate on the GPU based hardware.
-[yolo12s_code](https://github.com/aaliyanahmed1/yolo/blob/main/yolo12s_.py)
+[yolo12s_code](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Yolo_/YOLOS_/yolo12s_.py)
 
 Yolo12m  has significant accracy differnce from smallers ones and moderate speed ideal when deployed on server based inferneces.
-[yolo12m_code](https://github.com/aaliyanahmed1/yolo/blob/main/yolo12m_.py)
+[yolo12m_code](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Yolo_/YOLOS_/yolo12m_.py)
 
 Yolo12Large is high sopeed model best fot wher eprecision is crucial more then speed .mainly for medical imaging systems .
-[yolo12l_code](https://github.com/aaliyanahmed1/yolo/blob/main/yolo12l_.py)
+[yolo12l_code](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Yolo_/YOLOS_/yolo12l_.py)
 
-[Fine-tuning Yolo](https://github.com/aaliyanahmed1/yolo/blob/main/training.py).
+[Fine-tuning Yolo](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Yolo_/YOLOS_/training.py).
 these are the simple implementations of the yolo model variants for object detection tasks.
 
 3:**FastR-CNN** by Microsoft research its a two-stage detector object detection known for its precision and high accuracy. its slightly slower then other singlestage detectors . two-stage detector means first it process ROI(region of interests) in the image and then classifies and refine bounding boxes for each region this process reduces the false positive and overlapping of objects. thats why mostly its used where speed and accuracay both are required and mainly it can be seen depl;oyed on medical imaging systems .and it variants are mainly the backbones it uses like CNNs layers(ResNet-50,ResNet-101,MobileNet). which cause differnece in speed and accuracy .
@@ -382,13 +384,13 @@ these are the simple implementations of the yolo model variants for object detec
 
 
 ResNet-50: this backbone is balanced for speed and accuracy so where both are crucial then this would be ideal fit and commonly from FastR-CNN this backbone is commonly used.
-[FastR-CNN-ResNet50](https://github.com/aaliyanahmed1/FastR-CNN_/blob/master/fastrcnn_resnet50.py)
+[FastR-CNN-ResNet50](https://github.com/aaliyanahmed1/ML-Guide/blob/main/FasR-CNN_/fastrcnn_resnet50.py)
 
 ResNet-101:This has higher accuracy and slower inference so it should be integrate on precsion mandatory applications.
-[FastR-CNN-ResNet101](https://github.com/aaliyanahmed1/FastR-CNN_/blob/master/fastrcnn_resnet101.py).
+[FastR-CNN-ResNet101](https://github.com/aaliyanahmed1/ML-Guide/blob/main/FasR-CNN_/fastrcnn_resnet101.py).
 
 MobileNet this variant i s again lightwieght faster but accuracy is  compromised so not so ideal .
-[FastR-CNN_MobileNet](https://github.com/aaliyanahmed1/FastR-CNN_/blob/master/fastrcnn_mobile.py).
+[FastR-CNN_MobileNet](https://github.com/aaliyanahmed1/ML-Guide/blob/main/FasR-CNN_/fastrcnn_mobile.py).
 
 These are the mostly used object detection models for commercial enterpirse applications , reserach works and medical analysis . and all of them have multiple use case centric vairants having specialization for the specific task. we have discussed them and now just we will make a list of all the possible open source object detection models that are avaiable integration in production grade applications, research and development etc . 
 
