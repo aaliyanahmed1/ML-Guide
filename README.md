@@ -51,8 +51,9 @@ Accuracy metrices :
 
 2: Recall The ratio of correctly predicted positive detections t o all actual objects present in the dataset. 
 
-3:**IoU** it measures how much the predicted object bounding box overlaps with the real( ground truths) box its the ratio between
-overlap area/total combined area higher IOU = better prediction accuracy by the model.
+3:**IoU** it measures how much the predicted object bounding box overlaps with the real( ground truths) box.its the ratio between
+overlap area/total combined area.Higher IOU = better prediction accuracy by the model.it compares the difference between  ground truths and predictions.
+making visible the accuracy of the model.
 
 ![IOU ](/images/IOU_.png) 
 
