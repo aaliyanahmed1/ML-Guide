@@ -206,20 +206,16 @@ Its an open-source framework for building training and deploying AI models it al
 "tensorflow" core library for defining models performing operations and training models.
 [tensorflow](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tensorflow_core.py)
 
-tf.keras a high-Level API building and training neural networks easily.
-[tf.keras](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tf_keras.py)
+tensorflow_hub its model zoo of the tensorflow a great repository  for reusable pre-trained models to fine-tune and integrate them directly into the applications.  
+
+[tensorflow_hub](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tensorflow_hub_.py)
 
 tf.data for loading ,preprocessing and handling dataset.
 [tf.data](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tf_data.py)
 
 tf.image utilities for image procesing tasks.
 [tf.image](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tf_image.py)
-tf.audio functions for audio processing tasks.
-[tf.audio](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tf_audio.py)
-tf.text tools for natural language processing .
-[tf.text](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tf_text.py)
-tensorflow_hub its model zoo of the tensorflow a great repository  for reusable pre-trained models to fine-tune and integrate them directly into the applications.  
-[tensorflow_hub](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tensorflow_hub_.py)
+
 
 [Obejct detection with tensorflow](https://www.tensorflow.org/hub/tutorials/tf2_object_detection)
 [inference](https://github.com/aaliyanahmed1/tensorflow_/blob/main/tf2_object_detection.ipynb)
