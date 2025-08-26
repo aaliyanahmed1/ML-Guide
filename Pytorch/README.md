@@ -1,4 +1,4 @@
-# PyTorch Examples (Minimal)
+# PyTorch 
 
 This folder contains well‑commented scripts for object detection and
 quick intros to core PyTorch libraries.
