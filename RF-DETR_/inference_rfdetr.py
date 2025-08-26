@@ -2,14 +2,13 @@
 
 - Loads model via `inference.get_model` (Roboflow SDK)
 - Reads a local image path, runs inference, prints timings
-- Converts predictions to tensors: boxes [N,4], labels [N], scores [N]
+- Converts predictions to lists: boxes [[x1,y1,x2,y2]], labels [int], scores [float]
 - Saves an annotated image with bounding boxes and scores
 """
 
 import time
 from typing import Any, Dict, List
 
-import torch
 from PIL import Image, ImageDraw, ImageFont
 from inference import get_model  # Roboflow Inference SDK
 
@@ -52,8 +51,8 @@ def run_inference(model: Any, image_path: str) -> Dict[str, Any]:
     return outputs
 
 
-def to_tensors(outputs: Any, threshold: float) -> Dict[str, torch.Tensor]:
-    """Convert Roboflow predictions to tensors: boxes [N,4], labels [N], scores [N]."""
+def to_detections(outputs: Any, threshold: float) -> Dict[str, List]:
+    """Convert Roboflow predictions to lists: boxes, labels, scores."""
     t0 = time.perf_counter()
 
     # Normalize output structure to a list of predictions dicts
@@ -87,18 +86,12 @@ def to_tensors(outputs: Any, threshold: float) -> Dict[str, torch.Tensor]:
         labels.append(int(p.get("class_id", 0)))
         scores.append(conf)
 
-    result = {
-        "boxes": torch.tensor(boxes, dtype=torch.float32) if boxes else torch.zeros((0, 4), dtype=torch.float32),
-        "labels": torch.tensor(labels, dtype=torch.int64) if labels else torch.zeros((0,), dtype=torch.int64),
-        "scores": torch.tensor(scores, dtype=torch.float32) if scores else torch.zeros((0,), dtype=torch.float32),
-    }
-
     post_ms = (time.perf_counter() - t0) * 1000.0
     print(f"[Postprocess] Kept={len(boxes)}, Time={post_ms:.2f} ms")
-    return result
+    return {"boxes": boxes, "labels": labels, "scores": scores}
 
 
-def annotate_and_save(image: Image.Image, detections, output_path: str) -> None:
+def annotate_and_save(image: Image.Image, detections: Dict[str, List], output_path: str) -> None:
     """Draw bounding boxes with labels/scores on an image and save it."""
     draw = ImageDraw.Draw(image)
     try:
@@ -106,11 +99,7 @@ def annotate_and_save(image: Image.Image, detections, output_path: str) -> None:
     except Exception:
         font = ImageFont.load_default()
 
-    boxes = detections["boxes"].cpu().tolist()
-    labels = detections["labels"].cpu().tolist()
-    scores = detections["scores"].cpu().tolist()
-
-    for box, label, score in zip(boxes, labels, scores):
+    for box, label, score in zip(detections["boxes"], detections["labels"], detections["scores"]):
         x1, y1, x2, y2 = box
         draw.rectangle([(x1, y1), (x2, y2)], outline=(255, 0, 0), width=2)
         caption = f"id={label} | conf={score:.2f}"
@@ -124,9 +113,6 @@ def annotate_and_save(image: Image.Image, detections, output_path: str) -> None:
 
 def main() -> None:
     """End-to-end minimal inference with timing and prints using Roboflow SDK."""
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"[Device] Using: {device}")
-
     total_t0 = time.perf_counter()
 
     # 1) Load model
@@ -138,16 +124,14 @@ def main() -> None:
     # 3) Inference (Roboflow SDK handles preprocessing/resize internally)
     outputs = run_inference(model, IMAGE_PATH)
 
-    # 4) Convert predictions to tensors and filter
-    detections = to_tensors(outputs, threshold=CONFIDENCE_THRESHOLD)
+    # 4) Convert predictions to lists and filter
+    detections = to_detections(outputs, threshold=CONFIDENCE_THRESHOLD)
 
     # 5) Print detections in a readable form
-    boxes = detections["boxes"].cpu().tolist()
-    labels = detections["labels"].cpu().tolist()
-    scores = detections["scores"].cpu().tolist()
-
-    print("[Detections] count=", len(boxes))
-    for i, (box, lab, score) in enumerate(zip(boxes, labels, scores), 1):
+    print("[Detections] count=", len(detections["boxes"]))
+    for i, (box, lab, score) in enumerate(
+        zip(detections["boxes"], detections["labels"], detections["scores"]), 1
+    ):
         x1, y1, x2, y2 = [round(v, 2) for v in box]
         print(f"  #{i:02d} box=({x1}, {y1}, {x2}, {y2}) label_id={lab} score={score:.3f}")
 

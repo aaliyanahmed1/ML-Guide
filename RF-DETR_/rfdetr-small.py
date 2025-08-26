@@ -1,23 +1,9 @@
-"""RF-DETR Small (Roboflow Inference) - minimal example with visualization.
+"""RF-DETR Small (Roboflow Inference) — minimal example with visualization."""
 
-Inputs:
-- image_path (str): local image file
-
-Outputs:
-- Annotated visualization with bounding boxes, class ids, and confidences
-
-`torch` is only used for logging device availability in this script.
-"""
-
-import torch
 from PIL import Image
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from inference import get_model
-
-# Device info for consistency
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using device: {device}")
 
 # Load RF-DETR Small model
 model = get_model("rfdetr-small/1")

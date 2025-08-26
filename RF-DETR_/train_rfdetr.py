@@ -1,31 +1,58 @@
+"""Minimal RF-DETR training entry (optional rfdetr package required).
 
-import os
-from rfdetr import RFDETRBase
-from rfdetr import RFDETRBase  # RF-DETR core class
-from rfdetr import get_model
-import torch
+This script demonstrates how to fine-tune RF-DETR using the third-party
+`rfdetr` package. The Roboflow Inference SDK does not provide training; it is
+for inference only. If you want to train locally, install `rfdetr` first.
 
-def main():
-    # 1. Install prerequisites:
-    #    pip install rfdetr
+Usage:
+- Install: `pip install rfdetr`
+- Set `DATASET_DIR` to your COCO-style dataset root
+- Run: `python train_rfdetr.py`
+"""
 
-    # 2. Configure your dataset path (must follow COCO format)
-    dataset_dir = "dataset"  # contains train/, valid/, test/ subfolders with images + _annotations.coco.json
+import sys
 
-    # 3. Load the base RF-DETR model
-    model = RFDETRBase()  # loads RF-DETR Base with pretrained weights
+# Try to import the RF-DETR training API from the rfdetr package
+try:
+    from rfdetr import RFDETRBase  # type: ignore
+    RFDETR_AVAILABLE = True
+except Exception:  # pragma: no cover - package may be optional
+    RFDETR_AVAILABLE = False
 
-    # 4. Fine-tune the model on your dataset
+# User-configurable dataset/training settings
+DATASET_DIR = "dataset"          # expects train/, valid/, test/ with *_annotations.coco.json
+EPOCHS = 10
+BATCH_SIZE = 4
+GRAD_ACCUM_STEPS = 4
+LEARNING_RATE = 1e-4
+OUTPUT_DIR = "rf_detr_finetuned"
+
+
+def main() -> None:
+    """Optionally train RF-DETR using the `rfdetr` package if installed."""
+    if not RFDETR_AVAILABLE:
+        print(
+            "rfdetr package not found. To enable training, install it first: \n"
+            "  pip install rfdetr\n\n"
+            "Roboflow Inference SDK is used for inference only."
+        )
+        sys.exit(0)
+
+    # Create base RF-DETR model (loads pretrained weights internally)
+    model = RFDETRBase()
+
+    # Launch fine-tuning on your COCO-style dataset
     model.train(
-        dataset_dir=dataset_dir,
-        epochs=10,
-        batch_size=4,
-        grad_accum_steps=4,
-        lr=1e-4,
-        output_dir="rf_detr_finetuned"
+        dataset_dir=DATASET_DIR,
+        epochs=EPOCHS,
+        batch_size=BATCH_SIZE,
+        grad_accum_steps=GRAD_ACCUM_STEPS,
+        lr=LEARNING_RATE,
+        output_dir=OUTPUT_DIR,
     )
 
-    print("Training completed. Model and checkpoints saved to 'rf_detr_finetuned'.")
+    print(f"Training completed. Model and checkpoints saved to '{OUTPUT_DIR}'.")
+
 
 if __name__ == "__main__":
     main()

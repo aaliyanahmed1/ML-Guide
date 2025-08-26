@@ -4,6 +4,22 @@ Minimal RF-DETR inference examples using the Roboflow Inference SDK. Each script
 loads a specific RF-DETR variant, runs inference on a local image, prints
 results, and saves a simple visualization.
 
+## Why Roboflow Inference SDK (and when to use rfdetr)
+
+- **Roboflow Inference SDK (this folder’s scripts)**
+  - Purpose: simple, portable inference with minimal code and dependencies.
+  - Benefits: `get_model(...)` handles preprocessing, resizing, postprocessing, and
+    returns a consistent prediction schema across models.
+  - When to use: you only need to run inference on images and get boxes/labels/scores
+    quickly, with clean CI.
+
+- **rfdetr package (optional, training only)**
+  - Purpose: local fine‑tuning/training of RF‑DETR models (not provided by the
+    Inference SDK).
+  - When to use: you want to train on your data, change heads, or customize the
+    training loop.
+  - See `train_rfdetr.py` for a minimal entry that works if you install `rfdetr`.
+
 ## Requirements
 
 Install dependencies:
@@ -13,7 +29,6 @@ pip install -r requirements.txt
 ```
 
 `requirements.txt` includes:
-- torch, torchvision (common CV deps)
 - inference (Roboflow Inference SDK)
 - pillow, matplotlib, numpy, pycocotools, tqdm
 
@@ -71,7 +86,8 @@ python rfdetrlarge.py
   - Input/Output same as above.
 
 - `train_rfdetr.py`
-  - (Placeholder/minimal) training entry; customize for your workflow if needed.
+  - (Optional) minimal training entry using the third‑party `rfdetr` package.
+  - Install `rfdetr` if you want to fine‑tune: `pip install rfdetr`.
 
 ## Input / Output format (scripts)
 
@@ -81,13 +97,6 @@ python rfdetrlarge.py
   - one line per detection: `(x1, y1, x2, y2) label_id=<int> score=<float>`
 - Output (visual):
   - annotated image saved (for `inference_rfdetr.py`) or shown via matplotlib
-
-## Why is torch imported in scripts?
-
-- We use `torch` primarily to report device availability (CPU/GPU) and to
-  handle tensors after converting predictions to a consistent format. The
-  Roboflow Inference SDK itself runs fine without pushing tensors to GPU in
-  these minimal examples.
 
 ## Quick Start (alternative)
 

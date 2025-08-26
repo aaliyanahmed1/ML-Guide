@@ -1,23 +1,9 @@
-"""RF-DETR Nano (Roboflow Inference) - minimal example with visualization.
+"""RF-DETR Nano (Roboflow Inference) — minimal example with visualization."""
 
-Inputs:
-- image_path (str): local image path
-
-Outputs:
-- Drawn bounding boxes with class id and confidence on the image
-
-`torch` import is used to log device availability, not required by SDK.
-"""
-
-import torch
 from PIL import Image
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from inference import get_model
-
-# Device info for logging consistency
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using device: {device}")
 
 # Load RF-DETR Nano model
 model = get_model("rfdetr-nano/1")

@@ -1,24 +1,9 @@
-"""RF-DETR Large (Roboflow Inference) - minimal example with visualization.
+"""RF-DETR Large (Roboflow Inference) — minimal example with visualization."""
 
-Inputs:
-- image_path (str): local image file path
-
-Outputs:
-- Visualization with bounding boxes, class ids, and confidence scores
-
-`torch` is imported to print available device; Roboflow SDK inference itself
-does not require transferring tensors to that device in this script.
-"""
-
-import torch
 from PIL import Image
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from inference import get_model
-
-# Device status (informational)
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using device: {device}")
 
 # Load RF-DETR Large model
 model = get_model("rfdetr-large/1")

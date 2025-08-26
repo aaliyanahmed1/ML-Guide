@@ -1,4 +1,4 @@
-"""RF-DETR Base (Roboflow Inference) - minimal example with visualization.
+"""RF-DETR Base (Roboflow Inference) — minimal example with visualization.
 
 Inputs:
 - image_path (str): path to a local image file
@@ -9,19 +9,13 @@ Outputs (printed/visualized):
 
 Notes:
 - Uses Roboflow Inference SDK to load the model and run `.infer()`.
-- `torch` is imported only for optional device info and potential tensor ops.
-  The Roboflow SDK does not require `torch` to run inference in this script.
+- No torch usage required; Roboflow handles preprocessing/inference internally.
 """
 
-import torch
 from PIL import Image
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from inference import get_model
-
-# Configure device - for consistency/logging; not required by the SDK
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using device: {device}")
 
 # Load RF-DETR Base model from Roboflow Inference
 model = get_model("rfdetr-base/1")
