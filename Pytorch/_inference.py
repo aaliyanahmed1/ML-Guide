@@ -1,3 +1,10 @@
+"""Minimal torchvision Faster R-CNN inference script with fixed threshold.
+
+- Hardcoded model (Faster R-CNN ResNet50 FPN) with COCO weights
+- CLI: --image (required), --output (optional)
+- Saves an annotated image with boxes and labels
+"""
+
 import argparse
 import os
 from typing import Dict, List
