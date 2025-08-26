@@ -1,32 +1,56 @@
-# PyTorch Example Library
+# PyTorch Examples (Minimal)
 
-This repo simple, well-documented  examples of the pytorch ecosystem. Each file demonstrates core functionality of a major PyTorch library:
+This folder contains well‑commented scripts for object detection and
+quick intros to core PyTorch libraries.
 
-## Contents
+## What’s here
 
-- **torch_.py**  
-  Core PyTorch: Tensors, neural networks, training loops, and inference. Example: Train a simple feedforward neural network on dummy data.
+- `_inference.py`
+  - object detection inference using a hardcoded torchvision model
+    (Faster R‑CNN ResNet50 FPN). Takes an image path and writes an annotated
+    image. Keep it simple: no CLI beyond `--image` and optional `--output`.
+- `_training.py`
+  - object detection training on a COCO‑format dataset using
+    Faster R‑CNN. Constants at the top define paths and hyperparameters.
+- `torch_.py`
+  - Basic PyTorch: tensors + a tiny classifier training example.
+- `torchvision_.py`
+  - TorchVision intro: load a pretrained ResNet, preprocess an image, tiny
+    one‑epoch CIFAR10 training demo.
+- `torchaudio_.py`
+  - TorchAudio intro: synthesize audio, extract Mel spectrogram, tiny
+    classifier.
+- `requirements.txt`
+  - Required packages for the examples in this folder.
 
-- **torchvision_.py**  
-  TorchVision: Image processing, pre-trained models, and datasets. Example: Load a pre-trained ResNet, preprocess images, run inference, and train a simple model on CIFAR10.
+## Clone & Run
 
-- **torchaudio_.py**  
-  TorchAudio: Audio processing, feature extraction, and audio classification. Example: Generate dummy audio, extract Mel spectrograms, and train a simple classifier.
+```bash
+# 1) Clone the repo
+git clone https://github.com/aaliyanahmed1/ML-Guide
 
-- **requirements.txt**  
-  List of required packages: `torch`, `torchvision`, `torchaudio`.
+# 2) Enter this folder
+cd ML-Guide/Pytorch
 
-## Usage
+# 3) (Optional) Create venv, then install deps
+# python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
 
-1. Install dependencies:
-   ```powershell
-   pip install -r requirements.txt
-   ```
-2. Run any example:
-   ```powershell
-   python torch_.py
-   python torchvision_.py
-   python torchaudio_.py
-   ```
+# 4) Run minimal inference (edit the image path in the command)
+python _inference.py --image path/to/image.jpg --output result.jpg
 
-Each script is self-contained and includes comments to help you understand the workflow.
+# 5) Run minimal training (edit constants at top of the file, then)
+python _training.py
+
+# Library intros (optional)
+python torch_.py
+python torchvision_.py
+python torchaudio_.py
+```
+
+## Notes
+
+- `_inference.py` uses a COCO‑pretrained Faster R‑CNN for quick results.
+- `_training.py` expects COCO JSON annotations and image directories; set
+  `IMAGES_DIR`, `ANNOTATIONS_JSON`, etc. at the top of the script.
+- All scripts are intentionally minimal and documented for clarity.
