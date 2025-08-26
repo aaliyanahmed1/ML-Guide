@@ -3,8 +3,6 @@
 This folder contains well‑commented scripts for object detection and
 quick intros to core PyTorch libraries.
 
-## What’s here
-
 - `_inference.py`
   - object detection inference using a hardcoded torchvision model
     (Faster R‑CNN ResNet50 FPN). Takes an image path and writes an annotated
