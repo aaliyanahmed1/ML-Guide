@@ -1,8 +1,3 @@
-"""
-fastrcnn_mobile.py
-Faster R-CNN object detection with MobileNetV3 backbone for mobile applications.
-"""
-
 import torch
 import torchvision
 from torchvision.models.detection import fasterrcnn_mobilenet_v3_large_fpn

@@ -293,7 +293,7 @@ def load_pretrained_model():
     return model
 ```
 This function loads MobileNetV2 pretrained model that is also already trained on ImageNet dataset and it has already learned some general features like edges ,textures and shapes which be finetuned on its uppper layer for the custom tasks etc.finetuning basically helps leveraging the knowledge a pre-trained model has alredy trained on large dataset enabling it to quickly adapt to a new smaller and sopecialized custom dataset to perform task while having that much vast background of data patterns adoption.
-"GlobalAveragePooling2D()" custom head layer it maps the image intosingle vector per image."Dense(256, relu)"this  is fully connected layer added for specializing on the custom dataset patterns .this allows multi-label classification.
+"GlobalAveragePooling2D()" custom head layer it maps the image into single vector per image."Dense(256, relu)"this  is fully connected layer added for specializing on the custom dataset patterns .this allows multi-label classification.
 
 
 ```python

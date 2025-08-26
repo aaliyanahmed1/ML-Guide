@@ -1,113 +1,103 @@
-# RF-DETR Object Detection
+# RF-DETR (Roboflow Inference) — Object Detection
 
-Simple implementation of RF-DETR (Recursive Feature Detection Transformer) for object detection tasks.
+Minimal RF-DETR inference examples using the Roboflow Inference SDK. Each script
+loads a specific RF-DETR variant, runs inference on a local image, prints
+results, and saves a simple visualization.
 
-## Models Available
+## Requirements
 
-1. **RF-DETR Nano** (`rfdetr-nano.py`)
-   - Lightweight version for edge devices
-   - Fast inference speed
+Install dependencies:
 
-2. **RF-DETR Small** (`rfdetr-small.py`)
-   - Balanced performance
-   - Good for most applications
-
-3. **RF-DETR Base** (`rfdetrbase.py`)
-   - Standard model
-   - Best accuracy/speed trade-off
-
-4. **RF-DETR Large** (`rfdetrlarge.py`)
-   - Highest accuracy
-   - For complex detection tasks
-
-## Quick Start
-
-1. **Install Requirements**
 ```bash
 pip install -r requirements.txt
 ```
 
-2. **Training**
+`requirements.txt` includes:
+- torch, torchvision (common CV deps)
+- inference (Roboflow Inference SDK)
+- pillow, matplotlib, numpy, pycocotools, tqdm
+
+## Clone & Run
+
 ```bash
-python train_rfdetr.py
+# 1) Clone your repository
+git clone <YOUR_REPO_URL>
+
+# 2) Enter the RF-DETR folder
+cd ML-Guide/RF-DETR_
+
+# 3) (Recommended) Create venv, then install requirements
+# python -m venv .venv && source .venv/bin/activate  # on Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+
+# 4) Edit the script to set the IMAGE_PATH (and MODEL_ID if desired)
+#    e.g., open inference_rfdetr.py and update IMAGE_PATH at the top
+
+# 5) Run an example
+python inference_rfdetr.py
+
+# Or run a specific model variant demo (edit image_path inside the script first)
+python rfdetr-nano.py
+python rfdetr-small.py
+python rfdetrbase.py
+python rfdetrlarge.py
 ```
 
-3. **Inference**
-```python
-# Choose a model version (nano/small/base/large)
-from rfdetrbase import detect_objects
+## Files in this folder
 
-# Run detection
-results = detect_objects("image.jpg")
+- `inference_rfdetr.py`
+  - End-to-end, timed inference using Roboflow SDK: loads model via
+    `get_model("rfdetr-base/1")` by default, reads a local image, prints timings
+    and detections, and saves an annotated image.
+  - Inputs: update `IMAGE_PATH`, `MODEL_ID`, `CONFIDENCE_THRESHOLD`, `OUTPUT_IMAGE` at the top.
+  - Outputs: console logs (timing + detections) and an annotated image.
 
-## Usage
+- `rfdetr-nano.py`
+  - Minimal example loading `rfdetr-nano/1` via Roboflow SDK and visualizing
+    boxes with class ids + confidences.
+  - Input: edit `image_path` in the script.
+  - Output: matplotlib window with drawn boxes.
 
-### Training
-```python
-# Configure training
-config = {
-    'data_root': 'path/to/images',
-    'train_annotations': 'path/to/train.json',
-    'val_annotations': 'path/to/val.json',
-    'num_epochs': 20,
-    'batch_size': 4
-}
+- `rfdetr-small.py`
+  - Minimal example loading `rfdetr-small/1`.
+  - Input/Output same as above.
 
-# Start training
-python train_rfdetr.py
+- `rfdetrbase.py`
+  - Minimal example loading `rfdetr-base/1`.
+  - Input/Output same as above.
 
-## Model Selection Guide
+- `rfdetrlarge.py`
+  - Minimal example loading `rfdetr-large/1`.
+  - Input/Output same as above.
 
-- **Nano**: Mobile devices, edge computing
-- **Small**: Desktop applications, real-time needs
-- **Base**: General purpose, good balance
-- **Large**: High accuracy requirements
+- `train_rfdetr.py`
+  - (Placeholder/minimal) training entry; customize for your workflow if needed.
 
-## Requirements
+## Input / Output format (scripts)
 
-- PyTorch >= 2.0.0
-- Transformers >= 4.31.0
-- Torchvision >= 0.15.0
+- Input: a local image path (e.g. `./test_image.jpg`)
+- Output (printed):
+  - number of detections
+  - one line per detection: `(x1, y1, x2, y2) label_id=<int> score=<float>`
+- Output (visual):
+  - annotated image saved (for `inference_rfdetr.py`) or shown via matplotlib
 
-## Requirements
+## Why is torch imported in scripts?
 
-- PyTorch >= 2.0.0
-- Torchvision >= 0.15.0
-- Transformers >= 4.31.0
-- TIMM >= 0.9.2
-- Additional dependencies in requirements.txt
+- We use `torch` primarily to report device availability (CPU/GPU) and to
+  handle tensors after converting predictions to a consistent format. The
+  Roboflow Inference SDK itself runs fine without pushing tensors to GPU in
+  these minimal examples.
 
-## Model Features
+## Quick Start (alternative)
 
-RF-DETR improves upon traditional DETR by:
-- Using recursive feature refinement
-- Improved attention mechanisms
-- Better convergence speed
-- Enhanced small object detection
+1) Edit the image path and model id in the script you want to run
+   (e.g., `inference_rfdetr.py`).
 
-## Example Usage
+2) Run inference:
 
-1. Training on custom dataset:
-```python
-# Update dataset paths
-config = {
-    'data_root': 'path/to/images',
-    'train_annotations': 'path/to/train.json',
-    'val_annotations': 'path/to/val.json'
-}
-```
-
-2. Running inference:
-```python
-# Place images in test_images directory
-# Results will be saved in predictions directory
+```bash
 python inference_rfdetr.py
 ```
 
-## Output Format
-
-Detection results include:
-- Bounding box coordinates
-- Class predictions
-- Confidence scores
-- Visualizations with labeled boxes
+You should see console timings and an annotated image saved to disk.
