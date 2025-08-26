@@ -229,7 +229,9 @@ all are petrain and preloaded in tensorflow no need to download them mannually .
 [Fine-tuning Explanation](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tensorflow_explain.py)
 
 This was all about introduction of the framewroks now lets get back to the training .
-[training using tensorflow ](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/training.py).this is the sample practical implementation of trainng a model on custom dataset for object detection. 
+
+[Training using tensorflow ](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/training.py).
+This is the sample practical implementation of trainng a model on custom dataset for object detection. 
 
 
 
