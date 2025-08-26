@@ -180,6 +180,14 @@ torch for core operations and inference applciations .
 torchvision for computer vision image processing work .it has preloaded datasets that we can just import from library and the pretrained models that can be loaded to finetune them and also it provides the structure for defining custom models for differennt tasks . 
 torchaudio for audio processing and torchtext for natural language processing tasks.
 
+Minimal implementation of the pytorch code for fine-tuning(training) object detection model on custom dataset.
+
+[Training](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Pytorch/_training.py)
+
+and this one is for inference 
+
+[Inference](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Pytorch/_inference.py)
+
 **code implementation example**
 [torch](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Pytorch/torch_.py).
 [torchaudio](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Pytorch/torchaudio_.py).
