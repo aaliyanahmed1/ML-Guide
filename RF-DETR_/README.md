@@ -1,4 +1,4 @@
-# RF-DETR (Roboflow Inference) — Object Detection
+# RF-DETR  — Object Detection
 
 RF-DETR inference examples using the Roboflow Inference SDK. Each script
 loads a specific RF-DETR variant, runs inference on a local image, prints
