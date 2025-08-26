@@ -21,7 +21,7 @@ pip install -r requirements.txt
 
 ```bash
 # 1) Clone your repository
-git clone https://github.com/aaliyanahmed1/ML-Guide/blob/main/RF-DETR_
+git clone https://github.com/aaliyanahmed1/ML-Guide
 
 # 2) Enter the RF-DETR folder
 cd ML-Guide/RF-DETR_
