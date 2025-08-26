@@ -223,9 +223,10 @@ tf.image utilities for image procesing tasks.
 [Action recognition from video](https://www.tensorflow.org/hub/tutorials/action_recognition_with_tf_hub)
 recognizing action and events from the videos using tensorflow.
 
-now lets discuss the main library among all of the above tf.keras that is widely used and has significant role in model development using tensorflow.
+This Tensorflow implementation contains deep detailed explanation of fine-tuning an object detection model on custom dataset.
+all are petrain and preloaded in tensorflow no need to download them mannually .all of stuff is built-in.
 
-KerasHub is a pretrained modeling library that aims to be simple, flexible, and fast. The library provides Keras 3 implementations of popular model architectures, paired with a collection of pretrained checkpoints. Models can be used for both training and inference, on any of the computer vision image processing operations.because of its ready to use API and ready to use models it reduces experimentation time and makingit ideal for prototyping,research and deployments .using it we can easily load models on our custom datasets and fine-tune them for performign specific customs tasks.
+[Fine-tuning Explanation](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tensorflow_explain.py)
 
 This was all about introduction of the framewroks now lets get back to the training .
 [training using tensorflow ](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/training.py).this is the sample practical implementation of trainng a model on custom dataset for object detection. 
