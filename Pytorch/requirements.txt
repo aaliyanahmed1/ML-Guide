@@ -1,9 +1,18 @@
+# Core PyTorch packages
 torch>=2.0.0
 torchvision>=0.15.0
 torchaudio>=2.0.0
+
+# Object detection and computer vision
 transformers>=4.30.0
 pycocotools>=2.0.6
+
+# Data processing and visualization
 matplotlib>=3.7.1
 tqdm>=4.65.0
 pillow>=9.5.0
 numpy>=1.24.0
+
+# Additional utilities
+opencv-python>=4.8.0
+albumentations>=1.3.0

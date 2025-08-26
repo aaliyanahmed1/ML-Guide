@@ -1,3 +1,8 @@
+"""Basic PyTorch example: tiny binary classifier with a dummy dataset.
+
+This script demonstrates creating a small model, training for a few epochs,
+then running a quick inference pass. Intended for educational purposes.
+"""
 
 # Import torch for tensor operations and neural networks
 import torch
@@ -8,8 +13,9 @@ import torch.optim as optim
 # DataLoader and TensorDataset for batching and dataset handling
 from torch.utils.data import DataLoader, TensorDataset
 
-def train_simple_model():
 
+def train_simple_model():
+    """Train a minimal binary classifier on randomly generated data."""
     # Create a dummy dataset: 100 samples, 10 features each
     X = torch.randn(100, 10)
     # Binary labels (0 or 1), shape (100, 1)
@@ -41,16 +47,17 @@ def train_simple_model():
             loss = criterion(preds, yb)  # Compute loss
             loss.backward()         # Backpropagation
             optimizer.step()        # Update weights
-        print(f"Epoch {epoch+1}, Loss: {loss.item():.4f}")
+        print(f"Epoch {epoch + 1}, Loss: {loss.item():.4f}")
 
 
     # Inference: generate new test data and predict
     test_x = torch.randn(5, 10)
     with torch.no_grad():
         out = model(test_x)
-    print('Test predictions:', out.squeeze().numpy())
+    print("Test predictions:", out.squeeze().numpy())
+
 
 if __name__ == "__main__":
     # Run the full example
-    print('--- Torch Full Example ---')
+    print("--- Torch Full Example ---")
     train_simple_model()

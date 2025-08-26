@@ -53,7 +53,7 @@ Accuracy metrices :
 
 3 :**Precision** t measures the accuracy of a model’s positive predictions, indicating the proportion of items predicted as positive that were actually correct. It is calculated as True Positives / (True Positives + False Positives). High precision means the model has few false positives. This metric helps you understand how trustworthy your model is when it predicts a specific outcome.
 
-3:**IoU** it measures how much the predicted object bounding box overlaps with the real( ground truths) box.its the ratio between
+4:**IoU** it measures how much the predicted object bounding box overlaps with the real( ground truths) box.its the ratio between
 overlap area/total combined area.Higher IOU = better prediction accuracy by the model.it compares the difference between  ground truths and predictions.
 making visible the accuracy of the model. as visible in the image below green box is ground truth actual object area and the red box is predicted area by model so we can see slightly difference in overlapping of the boxes this visibly shows the accuracy of the model.
 

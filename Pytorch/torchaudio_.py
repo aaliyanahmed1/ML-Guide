@@ -1,3 +1,8 @@
+"""Minimal TorchAudio example: feature extraction and toy classifier.
+
+Generates a dummy waveform, extracts a Mel spectrogram, and trains a tiny
+classifier on synthetic data. Educational and CI-friendly.
+"""
 
 # Import torchaudio for audio processing and feature extraction
 import torchaudio
@@ -10,23 +15,26 @@ import torch.optim as optim
 # DataLoader for batching and shuffling data
 from torch.utils.data import DataLoader
 
-def load_sample_audio():
 
+def load_sample_audio():
+    """Create a random 1-second mono waveform at 16 kHz and return it."""
     # Generate a dummy audio waveform: 1 channel, 16000 samples (1 second at 16kHz)
     waveform = torch.randn(1, 16000)
     sample_rate = 16000
-    print('Waveform shape:', waveform.shape)
+    print("Waveform shape:", waveform.shape)
     return waveform, sample_rate
 
-def extract_features(waveform, sample_rate):
 
+def extract_features(waveform, sample_rate):
+    """Extract a Mel spectrogram from the input waveform."""
     # Extract Mel Spectrogram features from the waveform
     mel_spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate)(waveform)
-    print('MelSpectrogram shape:', mel_spec.shape)
+    print("MelSpectrogram shape:", mel_spec.shape)
     return mel_spec
 
-def train_audio_classifier():
 
+def train_audio_classifier():
+    """Train a tiny classifier on random audio-like tensors for 2 epochs."""
     # Create a dummy dataset: 100 audio samples, each with 1 channel and 400 samples
     X = torch.randn(100, 1, 400)
     # Binary labels (0 or 1) for each sample
@@ -40,7 +48,7 @@ def train_audio_classifier():
         nn.Flatten(),        # Flatten input
         nn.Linear(400, 16),  # Input to hidden layer
         nn.ReLU(),           # Activation function
-        nn.Linear(16, 2)     # Hidden to output (2 classes)
+        nn.Linear(16, 2),    # Hidden to output (2 classes)
     )
     # CrossEntropyLoss for multi-class classification
     criterion = nn.CrossEntropyLoss()
@@ -54,17 +62,18 @@ def train_audio_classifier():
             loss = criterion(preds, yb)  # Compute loss
             loss.backward()         # Backpropagation
             optimizer.step()        # Update weights
-        print(f"Epoch {epoch+1}, Loss: {loss.item():.4f}")
+        print(f"Epoch {epoch + 1}, Loss: {loss.item():.4f}")
+
 
 def main():
-
-    # Main function to run all steps
-    print('--- TorchAudio: Load Sample Audio ---')
+    """Run the end-to-end example: synthesize, featurize, and train."""
+    print("--- TorchAudio: Load Sample Audio ---")
     waveform, sample_rate = load_sample_audio()
-    print('\n--- TorchAudio: Feature Extraction ---')
+    print("\n--- TorchAudio: Feature Extraction ---")
     extract_features(waveform, sample_rate)
-    print('\n--- TorchAudio: Training Audio Classifier ---')
+    print("\n--- TorchAudio: Training Audio Classifier ---")
     train_audio_classifier()
+
 
 if __name__ == "__main__":
     main()
