@@ -1,9 +1,3 @@
-"""
-This module loads a COCO-pretrained Faster R-CNN model from torchvision,
-accepts an input image path from the CLI, performs detection with a fixed
-confidence threshold, and saves an output image with bounding boxes and labels.
-"""
-
 import argparse
 import os
 from typing import Dict, List
