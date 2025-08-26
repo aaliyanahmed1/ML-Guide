@@ -128,28 +128,48 @@ fetching frames from videos and real-time recordings and then defining the obeje
 This is the simple Python code snippet that can be used to extract frames from the videos to collect the dataset.
 
 ```python
+"""Video frame extraction script."""
+
 import cv2
 import os
 
-# Set your variables here:
-video_path = "input_video.mp4"
-num_frames_to_extract = 5
-output_folder = "frames"
 
-os.makedirs(output_folder, exist_ok=True)
-cap = cv2.VideoCapture(video_path)
-count = 0
+def extract_frames_from_video(video_path, num_frames_to_extract, output_folder):
+    """Extract frames from video file.
+    
+    Args:
+        video_path: Path to input video file
+        num_frames_to_extract: Number of frames to extract
+        output_folder: Output directory for extracted frames
+    """
+    os.makedirs(output_folder, exist_ok=True)
+    cap = cv2.VideoCapture(video_path)
+    count = 0
 
-while count < num_frames_to_extract:
-    ret, frame = cap.read()
-    if not ret:
-        break
-    cv2.imwrite(f"{output_folder}/frame_{count}.jpg", frame)
-    print(f"Saved frame {count}")
-    count += 1
+    while count < num_frames_to_extract:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        cv2.imwrite(f"{output_folder}/frame_{count}.jpg", frame)
+        print(f"Saved frame {count}")
+        count += 1
 
-cap.release()
-print("Done extracting frames.")
+    cap.release()
+    print("Done extracting frames.")
+
+
+def main():
+    """Main function to execute frame extraction."""
+    # Set your variables here
+    video_path = "input_video.mp4"
+    num_frames_to_extract = 5
+    output_folder = "frames"
+
+    extract_frames_from_video(video_path, num_frames_to_extract, output_folder)
+
+
+if __name__ == "__main__":
+    main()
 ```
 
 
@@ -432,7 +452,7 @@ def convert_rfdetr_to_onnx():
 
 if __name__ == "__main__":
     convert_rfdetr_to_onnx()
-    
+
 ```
 
 #### **Onxruntime**
