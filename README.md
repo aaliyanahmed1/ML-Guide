@@ -395,41 +395,44 @@ here is simple minimal code implementation to export model that is in its traini
 
 ```python
 
+"""RF-DETR to ONNX conversion script."""
+
 import torch
-from rfdetr import RFDETRSmall  # Choose RFDETRBase/Medium/Small
+from rfdetr import RFDETRSmall
 
-# ---------------------------
-# Step 1: Load pretrained RF-DETR model
-# ---------------------------
-model = RFDETRSmall()
-model.eval()  # Set to evaluation mode
 
-# ---------------------------
-# Step 2: Create dummy input
-# ---------------------------
-# Shape: [batch_size, 3, H, W] → match model's expected input
-dummy_input = torch.randn(1, 3, 800, 800)
+def convert_rfdetr_to_onnx():
+    """Convert RF-DETR model to ONNX format."""
+    # Load pretrained RF-DETR model
+    model = RFDETRSmall()
+    model.eval()
 
-# ---------------------------
-# Step 3: Export to ONNX
-# ---------------------------
-torch.onnx.export(
-    model,                       # PyTorch model
-    dummy_input,                 # Example input tensor
-    "rfdetr_small.onnx",         # Output ONNX file
-    input_names=["input"],       # Input node name
-    output_names=["logits", "boxes"],  # Output node names
-    dynamic_axes={               # Allow variable batch size & image dimensions
-        "input": {0: "batch", 2: "height", 3: "width"},
-        "logits": {0: "batch"},
-        "boxes": {0: "batch"},
-    },
-    opset_version=17,            # ONNX opset
-    do_constant_folding=True,    # Optimize constants
-    verbose=True
-)
+    # Create dummy input tensor
+    dummy_input = torch.randn(1, 3, 800, 800)
 
-print("✅ RF-DETR Small exported to rfdetr_small.onnx")
+    # Export to ONNX
+    torch.onnx.export(
+        model,
+        dummy_input,
+        "rfdetr_small.onnx",
+        input_names=["input"],
+        output_names=["logits", "boxes"],
+        dynamic_axes={
+            "input": {0: "batch", 2: "height", 3: "width"},
+            "logits": {0: "batch"},
+            "boxes": {0: "batch"},
+        },
+        opset_version=17,
+        do_constant_folding=True,
+        verbose=True,
+    )
+
+    print("✅ RF-DETR Small exported to rfdetr_small.onnx")
+
+
+if __name__ == "__main__":
+    convert_rfdetr_to_onnx()
+    
 ```
 
 #### **Onxruntime**
