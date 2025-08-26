@@ -1,14 +1,13 @@
 # TensorFlow Object Detection & Examples
 
-This folder contains minimal, well-documented examples of TensorFlow for object detection and core functionality. Each file demonstrates specific TensorFlow capabilities with clean, CI-compliant code.
+This folder contains minimal, well-documented examples of TensorFlow for object detection and core functionality. Each file demonstrates specific TensorFlow capabilities with clean code.
 
 ## Main Object Detection Scripts
 
 - **`_inference.py`** - Minimal TensorFlow object detection inference
-  - Uses EfficientDet-D0 from TensorFlow Hub for fast detection
-  - CLI: `--image` (required), `--output` (optional, default: tf_output.jpg)
-  - Hardcoded confidence threshold: 0.5
+  - Uses SSD MobileNet V2 from TensorFlow Hub for fast detection
   - Saves annotated image with bounding boxes and labels
+  - Logs inference timing to console
 
 - **`training.py`** - Minimal TensorFlow object detection training
   - Uses MobileNetV2 backbone with transfer learning on COCO dataset
@@ -41,7 +40,9 @@ This folder contains minimal, well-documented examples of TensorFlow for object 
 
 3. **Run object detection inference:**
    ```bash
-   python _inference.py --image path/to/your/image.jpg --output result.jpg
+   # Place your image as 'input.jpg' in the tensorflow folder
+   python _inference.py
+   # Output will be saved as 'output.jpg'
    ```
 
 4. **Run object detection training:**

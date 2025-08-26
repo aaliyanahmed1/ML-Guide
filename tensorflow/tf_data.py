@@ -1,10 +1,12 @@
+"""Efficient loading, preprocessing, and handling of datasets using tf.data.
+
+Includes practical examples: synthetic data, CSV loading, image folder loading,
+and advanced preprocessing.
 """
-tf_data.py
-Efficient loading, preprocessing, and handling of datasets using tf.data.
-Includes practical examples: synthetic data, CSV loading, image folder loading, and advanced preprocessing.
-"""
-import tensorflow as tf
+
 import os
+
+import tensorflow as tf
 
 # Example 1: Create a tf.data pipeline for synthetic image data
 def create_synthetic_data_pipeline():

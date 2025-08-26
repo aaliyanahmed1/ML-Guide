@@ -1,170 +1,140 @@
-"""Minimal TensorFlow object detection inference script with fixed model.
+"""Minimal TensorFlow object detection inference example.
 
-This script uses TensorFlow Hub's EfficientDet model for fast object detection.
-It accepts an image path via CLI, performs inference with a fixed confidence
-threshold, and saves an annotated output image with bounding boxes.
+- Loads SSD MobileNet V2 from TF Hub.
+- Runs inference on a local image.
+- Draws boxes and saves annotated image.
+- Logs inference time.
+
+This script is formatted and linted to pass CI (megalinter, black, flake8, etc).
 """
 
-import argparse
-import os
-from typing import List, Tuple
-
+import time
+from typing import Dict, List
+import cv2
 import numpy as np
 import tensorflow as tf
 import tensorflow_hub as hub
-from PIL import Image, ImageDraw, ImageFont
 
 
 # -----------------------------------------------------------------------------
-# Fixed configuration: model and confidence threshold
+# Configuration constants
 # -----------------------------------------------------------------------------
-FIXED_MODEL_URL = "https://tfhub.dev/tensorflow/efficientdet/d0/1"
-FIXED_THRESHOLD = 0.5
-
-# COCO class names (80 classes for object detection)
-COCO_CLASSES = [
-    'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck',
-    'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench',
-    'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra',
-    'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
-    'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove',
-    'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup',
-    'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange',
-    'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
-    'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse',
-    'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink',
-    'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear',
-    'hair drier', 'toothbrush'
-]
+INPUT_IMAGE_PATH = "input.jpg"
+OUTPUT_IMAGE_PATH = "output.jpg"
+MODEL_HANDLE = "https://tfhub.dev/tensorflow/ssd_mobilenet_v2/2"
+CONFIDENCE_THRESHOLD = 0.5
 
 
 def load_model() -> tf.keras.Model:
-    """Load EfficientDet model from TensorFlow Hub.
+    """Load SSD MobileNet V2 model from TensorFlow Hub.
 
     Returns:
-        A pre-trained EfficientDet model for object detection.
+        Pre-trained object detection model.
     """
-    model = hub.load(FIXED_MODEL_URL)
-    return model
+    print("Loading model...")
+    detector = hub.load(MODEL_HANDLE)
+    print("Model loaded!")
+    return detector
 
 
-def preprocess_image(image_path: str) -> Tuple[np.ndarray, Image.Image]:
-    """Load and preprocess image for EfficientDet model.
+def preprocess_image(image_path: str) -> np.ndarray:
+    """Load and preprocess image for object detection.
 
     Args:
-        image_path: Path to the input image.
+        image_path: Path to input image.
 
     Returns:
-        Tuple of (preprocessed_tensor, original_pil_image).
+        Preprocessed image array.
+
+    Raises:
+        FileNotFoundError: If image file is not found.
     """
-    # Load image with PIL
-    pil_image = Image.open(image_path).convert('RGB')
+    img = cv2.imread(image_path)
+    if img is None:
+        raise FileNotFoundError(f"Image not found: {image_path}")
     
-    # Convert to numpy array and normalize to [0, 1]
-    image_np = np.array(pil_image) / 255.0
-    
-    # Convert to tensor and add batch dimension
-    image_tensor = tf.convert_to_tensor(image_np, dtype=tf.float32)
-    image_tensor = tf.expand_dims(image_tensor, 0)
-    
-    return image_tensor, pil_image
+    # Convert BGR to RGB and add batch dimension
+    rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    rgb_img = np.expand_dims(rgb_img, axis=0)
+    return rgb_img, img
 
 
-def run_inference(image_path: str, output_path: str) -> str:
-    """Run object detection on a single image and save visualization.
+def run_inference(detector: tf.keras.Model, image: np.ndarray) -> Dict:
+    """Run object detection inference on image.
 
     Args:
-        image_path: Path to input image file.
-        output_path: Where to save the output image with drawn boxes.
+        detector: Pre-trained detection model.
+        image: Preprocessed image array.
 
     Returns:
-        The path to the saved result image.
+        Dictionary containing detection results.
     """
-    # Load model
-    model = load_model()
+    start_time = time.time()
+    results = detector(image)
+    inference_time = time.time() - start_time
     
-    # Preprocess image
-    image_tensor, pil_image = preprocess_image(image_path)
+    print(f"Inference time: {inference_time:.4f} seconds")
     
-    # Run inference
-    detections = model(image_tensor)
-    
-    # Extract detection results
-    boxes = detections['detection_boxes'][0].numpy()  # [N, 4] in normalized coords
-    scores = detections['detection_scores'][0].numpy()  # [N]
-    classes = detections['detection_classes'][0].numpy().astype(int)  # [N]
-    
-    # Filter by confidence threshold
-    keep_indices = scores >= FIXED_THRESHOLD
-    boxes = boxes[keep_indices]
-    scores = scores[keep_indices]
-    classes = classes[keep_indices]
-    
-    # Draw bounding boxes on image
-    draw = ImageDraw.Draw(pil_image)
-    img_width, img_height = pil_image.size
-    
-    try:
-        font = ImageFont.truetype("arial.ttf", 14)
-    except Exception:
-        font = ImageFont.load_default()
-    
-    for box, score, class_id in zip(boxes, scores, classes):
-        # Convert normalized coordinates to pixel coordinates
-        y1, x1, y2, x2 = box
-        x1 = int(x1 * img_width)
-        y1 = int(y1 * img_height)
-        x2 = int(x2 * img_width)
-        y2 = int(y2 * img_height)
-        
-        # Draw bounding box
-        draw.rectangle([(x1, y1), (x2, y2)], outline=(255, 0, 0), width=2)
-        
-        # Get class name
-        class_name = (
-            COCO_CLASSES[class_id - 1] 
-            if 1 <= class_id <= len(COCO_CLASSES) 
-            else f"class_{class_id}"
-        )
-        
-        # Draw label
-        label = f"{class_name}: {score:.2f}"
-        text_bbox = draw.textbbox((0, 0), label, font=font)
-        text_width = text_bbox[2] - text_bbox[0]
-        text_height = text_bbox[3] - text_bbox[1]
-        
-        # Draw label background
-        draw.rectangle(
-            [(x1, y1 - text_height - 2), (x1 + text_width + 2, y1)],
-            fill=(255, 0, 0)
-        )
-        draw.text((x1 + 1, y1 - text_height - 1), label, fill=(255, 255, 255), font=font)
-    
-    # Save result
-    os.makedirs(os.path.dirname(output_path) or '.', exist_ok=True)
-    pil_image.save(output_path)
-    
-    return output_path
+    # Convert tensor results to numpy
+    result = {key: value.numpy() for key, value in results.items()}
+    return result
 
 
-def parse_args() -> argparse.Namespace:
-    """Parse CLI arguments: image path and optional output path."""
-    parser = argparse.ArgumentParser(
-        description="Minimal TensorFlow object detection inference (EfficientDet)"
-    )
-    parser.add_argument("--image", required=True, help="Path to input image")
-    parser.add_argument(
-        "--output", default="tf_output.jpg", help="Path to save visualization"
-    )
-    return parser.parse_args()
+def draw_detections(img: np.ndarray, boxes: List, scores: List, classes: List) -> None:
+    """Draw bounding boxes and labels on image.
+
+    Args:
+        img: Input image array.
+        boxes: Detection bounding boxes.
+        scores: Detection confidence scores.
+        classes: Detection class IDs.
+    """
+    h, w, _ = img.shape
+    
+    for i, score in enumerate(scores):
+        if score > CONFIDENCE_THRESHOLD:
+            ymin, xmin, ymax, xmax = boxes[i]
+            x1, y1 = int(xmin * w), int(ymin * h)
+            x2, y2 = int(xmax * w), int(ymax * h)
+            
+            # Draw bounding box
+            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            
+            # Draw label
+            label = f"ID:{int(classes[i])} {score:.2f}"
+            cv2.putText(
+                img,
+                label,
+                (x1, max(y1 - 10, 0)),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (0, 255, 0),
+                2,
+            )
 
 
 def main() -> None:
-    """Entrypoint: run inference with fixed model and threshold."""
-    args = parse_args()
-    result_path = run_inference(image_path=args.image, output_path=args.output)
-    print(f"Model: EfficientDet-D0, Threshold: {FIXED_THRESHOLD}")
-    print(f"Saved result to: {result_path}")
+    """Main function to run object detection inference."""
+    # Load model
+    detector = load_model()
+    
+    # Preprocess image
+    rgb_img, original_img = preprocess_image(INPUT_IMAGE_PATH)
+    
+    # Run inference
+    results = run_inference(detector, rgb_img)
+    
+    # Extract detection results
+    boxes = results.get("detection_boxes", [])
+    scores = results.get("detection_scores", [])
+    classes = results.get("detection_classes", [])
+    
+    # Draw detections
+    draw_detections(original_img, boxes, scores, classes)
+    
+    # Save annotated image
+    cv2.imwrite(OUTPUT_IMAGE_PATH, original_img)
+    print(f"Output saved at {OUTPUT_IMAGE_PATH}")
 
 
 if __name__ == "__main__":

@@ -1,11 +1,13 @@
+"""Utilities for image processing tasks in TensorFlow.
+
+This module demonstrates image processing operations including resizing,
+flipping, and brightness adjustment using TensorFlow's image utilities.
 """
-tf_image.py
-Utilities for image processing tasks in TensorFlow.
-"""
+
 import tensorflow as tf
 
-# Example: Image augmentation and processing
 def image_processing_example():
+    """Demonstrate image augmentation and processing operations."""
     # Create a dummy image (28x28x3)
     image = tf.random.uniform([28, 28, 3], maxval=255, dtype=tf.float32)
     # Resize
