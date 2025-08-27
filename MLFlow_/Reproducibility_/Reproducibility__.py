@@ -137,15 +137,43 @@ def verify_reproducibility():
     return is_reproducible
 
 if __name__ == "__main__":
+    # Import utils for enhanced output
+    try:
+        import sys
+        import os
+        
+        # Add parent directory to path to import utils
+        parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if parent_dir not in sys.path:
+            sys.path.append(parent_dir)
+        
+        from utils import print_section, print_subsection, print_environment_info as print_env
+        
+        # Print environment information
+        print_section("MLflow Reproducibility Example")
+        print_env()
+    except ImportError:
+        # If utils.py is not available, continue without enhanced output
+        print("\n===== MLflow Reproducibility Example =====")
+    
     # Log environment information
-    log_environment_info()
+    print_subsection("Logging Environment Information") if 'print_subsection' in locals() else print("\n--- Logging Environment Information ---")
+    env_run_id = log_environment_info()
     
     # Verify reproducibility
+    print_subsection("Verifying Reproducibility") if 'print_subsection' in locals() else print("\n--- Verifying Reproducibility ---")
     is_reproducible = verify_reproducibility()
     
+    # Print results
+    print_subsection("Reproducibility Results") if 'print_subsection' in locals() else print("\n--- Reproducibility Results ---")
     if is_reproducible:
-        print("\nSuccess! The model training is reproducible.")
+        print("Success! The model training is reproducible.")
+        print("Using fixed random seeds ensures consistent results across runs.")
     else:
-        print("\nWarning! The model training is not perfectly reproducible.")
+        print("Warning! The model training is not perfectly reproducible.")
         print("This could be due to non-deterministic operations in the libraries.")
         print("Consider using deterministic algorithms or fixed seeds for all operations.")
+    
+    print("\nReproducibility example completed.")
+    print("Environment information and model runs have been logged to MLflow.")
+    print("To view results in the MLflow UI, run: mlflow ui")

@@ -98,13 +98,32 @@ def run_multiple_experiments(param_variations):
     return results
 
 if __name__ == "__main__":
+    # Import utils for enhanced output
+    try:
+        from utils import print_section, print_subsection, print_environment_info
+        
+        # Print environment information
+        print_section("MLflow Experiment Tracking Example")
+        print_environment_info()
+    except ImportError:
+        # If utils.py is not available, continue without enhanced output
+        print("\n===== MLflow Experiment Tracking Example =====")
+    
     # Example usage
+    print_subsection("Running Multiple Experiments") if 'print_subsection' in locals() else print("\n--- Running Multiple Experiments ---")
     param_variations = [
         {"n_estimators": 100, "max_depth": 10},
         {"n_estimators": 200, "max_depth": 15},
         {"n_estimators": 300, "max_depth": None},
     ]
-    run_multiple_experiments(param_variations)
+    results = run_multiple_experiments(param_variations)
+    
+    # Print summary
+    print_subsection("Experiment Summary") if 'print_subsection' in locals() else print("\n--- Experiment Summary ---")
+    print(f"Total experiments run: {len(results)}")
+    print(f"Parameter variations tested: {len(param_variations)}")
+    print("\nExperiment results have been logged to MLflow.")
+    print("To view results in the MLflow UI, run: mlflow ui")
 
 
 

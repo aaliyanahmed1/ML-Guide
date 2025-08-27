@@ -20,19 +20,21 @@
 
 ### Prerequisites
 
-```bash
-pip install mlflow scikit-learn pandas numpy matplotlib flask
-```
-
-For additional functionality:
+Install all required dependencies using the provided requirements.txt file:
 
 ```bash
-pip install mlflow[extras]
+pip install -r requirements.txt
 ```
 
 ### Running Examples
 
-Each Python file in this directory can be run independently:
+You can run all examples at once with thorough output using the main.py script:
+
+```bash
+python main.py
+```
+
+Or run each Python file independently:
 
 ```bash
 python Exp_tracking.py
@@ -41,6 +43,7 @@ python model_versioning.py
 python comp_runs.py
 python deployment_.py
 python Reproducibility_/Reproducibility__.py
+python mlflow_eg.py
 ```
 
 ### Viewing MLflow UI

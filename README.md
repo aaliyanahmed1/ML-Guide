@@ -224,18 +224,7 @@ this documentation covers everything need to define a custom neural network\mode
 Its an open-source framework for building training and deploying AI models it also provide libraries and architecures to build custom neural network/models and also some pre-trained models for inference. pre-loaded datasets post-processing and preprocessing tools for datasets handling .major libraries from tensorflow and there code implementations .
 
 "tensorflow" core library for defining models performing operations and training models.
-[tensorflow](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tensorflow_core.py)
-
-tensorflow_hub its model zoo of the tensorflow a great repository  for reusable pre-trained models to fine-tune and integrate them directly into the applications.  
-
-[tensorflow_hub](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tensorflow_hub_.py)
-
-tf.data for loading ,preprocessing and handling dataset.
-[tf.data](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tf_data.py)
-
-tf.image utilities for image procesing tasks.
-[tf.image](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tf_image.py)
-
+[tensorflow](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow)
 
 [Obejct detection with tensorflow](https://www.tensorflow.org/hub/tutorials/tf2_object_detection)
 [inference](https://github.com/aaliyanahmed1/tensorflow_/blob/main/tf2_object_detection.ipynb)
@@ -430,47 +419,7 @@ Deployment is very typical part of every Machine learning workflow.when it comes
  Its is an open standard format for representing machine learning models. Exporting models to ONNX decouples them from the original training framework, making them easier to integrate into different platforms, whether on a server, multiple edge devices, or in the cloud. It ensures compatibility across various tools and allows optimized inference on different hardware setups, helping maintain real-time performance.
 here is simple minimal code implementation to export model that is in its training framework to export it ot ONNX format for cross-platofrm integration and further optimizations.
 
-```python
 
-"""RF-DETR to ONNX conversion script."""
-
-import torch
-from rfdetr import RFDETRSmall
-
-
-def convert_rfdetr_to_onnx():
-    """Convert RF-DETR model to ONNX format."""
-    # Load pretrained RF-DETR model
-    model = RFDETRSmall()
-    model.eval()
-
-    # Create dummy input tensor
-    dummy_input = torch.randn(1, 3, 800, 800)
-
-    # Export to ONNX
-    torch.onnx.export(
-        model,
-        dummy_input,
-        "rfdetr_small.onnx",
-        input_names=["input"],
-        output_names=["logits", "boxes"],
-        dynamic_axes={
-            "input": {0: "batch", 2: "height", 3: "width"},
-            "logits": {0: "batch"},
-            "boxes": {0: "batch"},
-        },
-        opset_version=17,
-        do_constant_folding=True,
-        verbose=True,
-    )
-
-    print("✅ RF-DETR Small exported to rfdetr_small.onnx")
-
-
-if __name__ == "__main__":
-    convert_rfdetr_to_onnx()
-
-```
 
 #### **Onxruntime**
  is a high-performance inference engine designed to run ONNX modles efficiently accross different platforms.it takes the ONNX model and applies grapgh optimization,operator fusion and quantizations to reduce memory usage and computation time .so models run faster on servers,cloud enviroments and on multiple edge devices without needing original training framework.it can also speedup training process of large models by just making simple changes in code it can make training faster and effcient without changing workflow too much.  
