@@ -406,6 +406,17 @@ Transformers are type of deep learing architectures designed to handle sequentia
   **Accuracy:** Good overall performance
 [RT-DETR](https://huggingface.co/PekingU/rtdetr_r101vd_coco_o365).
 
+### MLflow
+
+MLFlow is an open-source platform,purpose-built to assisst machine learning practitioners and teams handling the complexities of the machine learning process.MLflow focuses on the full lifecycle for machine learning projects ensuring that each phase is manageable,traceable and reproducible.MLflow provides comprehensive support for tradiotional machine learning and deep learning workflows.from experiment tracking and model versioning to deployment and monitoring,MLflow streamlines every aspect of ML lifecycles. Whether you;re working with scikit-learn models,training deep neural networks,or managing complex ML pipelines,MLflow provides the tools you need to build reliable,scalable machine learning systems.
+
+ **corefeatures** : Mlflow Tracking provides comprehensive experiment logging,parameters tracking, metrics tracking, ,model vers1ioning and artifact management.
+
+Experiment Orgaminations: Track and compare multiple models experiments.
+Metric Visualization: built-in plots and charts for model performance.
+Artifact Storage:Store models,plots and other files each run.
+Collaboration: Share experiments and models with team members.
+
 ### Deployment
 Deployment is very typical part of every Machine learning workflow.when it comes to deployment maintaining fps for real-time systems becoems nightmare of MLOps architects so thats why the universal way to deploy model and maintain performance is to decouple it from training framework, that simplifis and reduces down burden of heavy dependencies and speed up the process is exporting model in ONNX(Open Neural Network Exchange) format.this simplifies integration of model and makes it compatible.
 

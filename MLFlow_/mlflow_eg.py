@@ -1,3 +1,5 @@
+"""MLflow example for YOLO model training and logging."""
+
 import os
 import mlflow
 import mlflow.data
