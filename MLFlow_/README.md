@@ -1,6 +1,6 @@
 # MLflow Guide
 
-This directory contains examples and guides for using MLflow, an open-source platform for managing the machine learning lifecycle. MLflow provides tools for tracking experiments, packaging code into reproducible runs, and sharing and deploying models.
+
 
 ## Contents
 

@@ -413,8 +413,12 @@ MLFlow is an open-source platform,purpose-built to assisst machine learning prac
  **corefeatures** : Mlflow Tracking provides comprehensive experiment logging,parameters tracking, metrics tracking, ,model vers1ioning and artifact management.
 
 Experiment Orgaminations: Track and compare multiple models experiments.
+
 Metric Visualization: built-in plots and charts for model performance.
+
+
 Artifact Storage:Store models,plots and other files each run.
+
 Collaboration: Share experiments and models with team members.
 
 ### Deployment
