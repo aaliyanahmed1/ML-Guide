@@ -224,7 +224,18 @@ this documentation covers everything need to define a custom neural network\mode
 Its an open-source framework for building training and deploying AI models it also provide libraries and architecures to build custom neural network/models and also some pre-trained models for inference. pre-loaded datasets post-processing and preprocessing tools for datasets handling .major libraries from tensorflow and there code implementations .
 
 "tensorflow" core library for defining models performing operations and training models.
-[tensorflow](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow)
+[tensorflow](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tensorflow_core.py)
+
+tensorflow_hub its model zoo of the tensorflow a great repository  for reusable pre-trained models to fine-tune and integrate them directly into the applications.  
+
+[tensorflow_hub](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tensorflow_hub_.py)
+
+tf.data for loading ,preprocessing and handling dataset.
+[tf.data](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tf_data.py)
+
+tf.image utilities for image procesing tasks.
+[tf.image](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tf_image.py)
+
 
 [Obejct detection with tensorflow](https://www.tensorflow.org/hub/tutorials/tf2_object_detection)
 [inference](https://github.com/aaliyanahmed1/tensorflow_/blob/main/tf2_object_detection.ipynb)

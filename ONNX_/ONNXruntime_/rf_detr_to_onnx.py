@@ -1,57 +1,41 @@
-"""Export RF-DETR (Roboflow) to ONNX format.
+```python
 
-This script:
-1. Loads the pretrained RF-DETR model from Hugging Face.
-2. Exports it to ONNX format.
-3. Saves the model as `rf_detr.onnx`.
-
-Usage:
-    python export_to_onnx.py
-"""
+"""RF-DETR to ONNX conversion script."""
 
 import torch
-from transformers import AutoModelForObjectDetection
+from rfdetr import RFDETRSmall
 
 
-def export_rfdetr_to_onnx(
-    model_name: str = "roboflow/rf-detr-resnet50",
-    output_path: str = "rf_detr.onnx",
-) -> None:
-    """Load RF-DETR and export it to ONNX format.
-
-    Args:
-        model_name (str): Hugging Face model ID.
-        output_path (str): Path to save the exported ONNX file.
-
-    Returns:
-        None
-    """
-    # Load pretrained RF-DETR
-    model = AutoModelForObjectDetection.from_pretrained(model_name)
+def convert_rfdetr_to_onnx():
+    """Convert RF-DETR model to ONNX format."""
+    # Load pretrained RF-DETR model
+    model = RFDETRSmall()
     model.eval()
 
-    # Dummy input (batch=1, 3-channel RGB, 640x640)
-    dummy_input = torch.randn(1, 3, 640, 640)
+    # Create dummy input tensor
+    dummy_input = torch.randn(1, 3, 800, 800)
 
-    # Export model to ONNX
+    # Export to ONNX
     torch.onnx.export(
         model,
         dummy_input,
-        output_path,
-        export_params=True,
-        opset_version=12,
-        do_constant_folding=True,
-        input_names=["images"],
-        output_names=["pred_logits", "pred_boxes"],
+        "rfdetr_small.onnx",
+        input_names=["input"],
+        output_names=["logits", "boxes"],
         dynamic_axes={
-            "images": {0: "batch_size"},
-            "pred_logits": {0: "batch_size"},
-            "pred_boxes": {0: "batch_size"},
+            "input": {0: "batch", 2: "height", 3: "width"},
+            "logits": {0: "batch"},
+            "boxes": {0: "batch"},
         },
+        opset_version=17,
+        do_constant_folding=True,
+        verbose=True,
     )
 
-    print(f"✅ RF-DETR model exported successfully to: {output_path}")
+    print("✅ RF-DETR Small exported to rfdetr_small.onnx")
 
 
 if __name__ == "__main__":
-    export_rfdetr_to_onnx()
+    convert_rfdetr_to_onnx()
+
+```
