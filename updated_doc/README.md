@@ -1923,3 +1923,1637 @@ output = client.image_segmentation("cats.jpg", model="facebook/mask2former-swin-
 [ONNX Runtime Docs](https://onnxruntime.ai/docs/get-started/with-python.html#install-onnx-runtime)
 
 [ONNX Runtime for Training](https://onnxruntime.ai/training)
+
+---
+
+### Model Export to ONNX
+
+**Converting models to ONNX:** After training your model in PyTorch or TensorFlow, export it to ONNX format for deployment. This makes model framework-independent and ready for production deployment on any platform.
+
+**File: `deployment/export_to_onnx.py`**
+```python
+"""
+Model Export to ONNX Format
+----------------------------
+Export trained models from PyTorch/TensorFlow to ONNX format.
+Essential for cross-platform deployment and optimization.
+"""
+
+import torch
+import onnx
+import onnxruntime as ort
+import numpy as np
+
+
+def export_pytorch_to_onnx(model, dummy_input, onnx_path, input_names=['input'], output_names=['output']):
+    """
+    Export PyTorch model to ONNX format.
+
+    Why export to ONNX:
+    - Framework independent deployment
+    - Optimized inference on different hardware
+    - Compatible with ONNX Runtime, TensorRT, OpenVINO
+    - Smaller model size with optimizations
+
+    Args:
+        model: Trained PyTorch model
+        dummy_input: Sample input tensor matching model's expected input
+        onnx_path: Path to save ONNX model
+        input_names: Names for input nodes
+        output_names: Names for output nodes
+
+    Example:
+        model = torch.load('yolo_model.pt')
+        dummy_input = torch.randn(1, 3, 640, 640)
+        export_pytorch_to_onnx(model, dummy_input, 'model.onnx')
+    """
+    # Set model to evaluation mode
+    model.eval()
+
+    print(f"Exporting PyTorch model to ONNX...")
+
+    # Export model to ONNX
+    torch.onnx.export(
+        model,                      # Model to export
+        dummy_input,                # Sample input
+        onnx_path,                  # Output path
+        export_params=True,         # Store trained parameters
+        opset_version=12,          # ONNX version
+        do_constant_folding=True,   # Optimize constant folding
+        input_names=input_names,    # Input tensor names
+        output_names=output_names,  # Output tensor names
+        dynamic_axes={              # Dynamic batch size
+            input_names[0]: {0: 'batch_size'},
+            output_names[0]: {0: 'batch_size'}
+        }
+    )
+
+    print(f"✓ Model exported to {onnx_path}")
+
+    # Verify exported model
+    verify_onnx_model(onnx_path)
+
+
+def export_tensorflow_to_onnx(model, onnx_path, input_shape=(1, 640, 640, 3)):
+    """
+    Export TensorFlow model to ONNX format.
+
+    Requires: tf2onnx library
+    Install: pip install tf2onnx
+
+    Args:
+        model: Trained TensorFlow/Keras model
+        onnx_path: Path to save ONNX model
+        input_shape: Input tensor shape
+
+    Example:
+        model = tf.keras.models.load_model('model.h5')
+        export_tensorflow_to_onnx(model, 'model.onnx')
+    """
+    import tf2onnx
+    import tensorflow as tf
+
+    print(f"Exporting TensorFlow model to ONNX...")
+
+    # Convert model
+    spec = (tf.TensorSpec(input_shape, tf.float32, name="input"),)
+    output_path = onnx_path
+
+    model_proto, _ = tf2onnx.convert.from_keras(
+        model,
+        input_signature=spec,
+        opset=12,
+        output_path=output_path
+    )
+
+    print(f"✓ Model exported to {onnx_path}")
+
+    # Verify exported model
+    verify_onnx_model(onnx_path)
+
+
+def verify_onnx_model(onnx_path):
+    """
+    Verify exported ONNX model is valid.
+
+    Checks:
+    - Model structure is valid
+    - Can be loaded by ONNX Runtime
+    - Inference works correctly
+
+    Args:
+        onnx_path: Path to ONNX model file
+    """
+    print(f"\nVerifying ONNX model...")
+
+    # Load and check model
+    onnx_model = onnx.load(onnx_path)
+    onnx.checker.check_model(onnx_model)
+    print("✓ ONNX model structure is valid")
+
+    # Create ONNX Runtime session
+    session = ort.InferenceSession(onnx_path)
+
+    # Print input/output info
+    print("\nModel Inputs:")
+    for input in session.get_inputs():
+        print(f"  - {input.name}: {input.shape} ({input.type})")
+
+    print("\nModel Outputs:")
+    for output in session.get_outputs():
+        print(f"  - {output.name}: {output.shape} ({output.type})")
+
+    print("\n✓ Model verification complete")
+
+
+def optimize_onnx_model(onnx_path, optimized_path):
+    """
+    Optimize ONNX model for faster inference.
+
+    Optimizations applied:
+    - Constant folding
+    - Redundant node elimination
+    - Operator fusion
+    - Shape inference
+
+    Args:
+        onnx_path: Path to original ONNX model
+        optimized_path: Path to save optimized model
+    """
+    from onnxruntime.transformers import optimizer
+
+    print(f"Optimizing ONNX model...")
+
+    # Load model
+    model = onnx.load(onnx_path)
+
+    # Apply optimizations
+    from onnx import optimizer as onnx_optimizer
+
+    passes = [
+        'eliminate_nop_transpose',
+        'eliminate_nop_pad',
+        'fuse_consecutive_transposes',
+        'fuse_transpose_into_gemm',
+    ]
+
+    optimized_model = onnx_optimizer.optimize(model, passes)
+
+    # Save optimized model
+    onnx.save(optimized_model, optimized_path)
+
+    # Compare sizes
+    import os
+    original_size = os.path.getsize(onnx_path) / (1024 * 1024)
+    optimized_size = os.path.getsize(optimized_path) / (1024 * 1024)
+
+    print(f"✓ Optimization complete")
+    print(f"Original size: {original_size:.2f} MB")
+    print(f"Optimized size: {optimized_size:.2f} MB")
+    print(f"Size reduction: {((original_size - optimized_size) / original_size * 100):.1f}%")
+
+
+# Example usage
+if __name__ == "__main__":
+    # PyTorch export example
+    print("="*50)
+    print("PyTorch to ONNX Export")
+    print("="*50)
+
+    # Load PyTorch model (example)
+    # model = torch.load('trained_model.pt')
+    # dummy_input = torch.randn(1, 3, 640, 640)
+    # export_pytorch_to_onnx(model, dummy_input, 'model.onnx')
+
+    # TensorFlow export example
+    print("\n" + "="*50)
+    print("TensorFlow to ONNX Export")
+    print("="*50)
+
+    # Load TensorFlow model (example)
+    # import tensorflow as tf
+    # model = tf.keras.models.load_model('trained_model.h5')
+    # export_tensorflow_to_onnx(model, 'model.onnx')
+
+    # Optimize ONNX model
+    # optimize_onnx_model('model.onnx', 'model_optimized.onnx')
+```
+
+---
+
+### Real-Time Inference
+
+**Running inference on live streams:** Deploy model for real-time object detection on webcam, RTSP streams, or video files. Critical for surveillance systems, autonomous vehicles, and live monitoring applications.
+
+**File: `deployment/real_time_inference.py`**
+```python
+"""
+Real-Time Object Detection Inference
+-------------------------------------
+Run object detection on webcam, RTSP streams, and video files.
+Optimized for real-time performance with FPS tracking.
+"""
+
+import cv2
+import numpy as np
+import onnxruntime as ort
+import time
+from collections import deque
+
+
+class RealTimeDetector:
+    """
+    Real-time object detection using ONNX models.
+
+    Supports:
+    - Webcam inference
+    - RTSP stream inference
+    - Video file inference
+    - FPS calculation and display
+    """
+
+    def __init__(self, onnx_model_path, conf_threshold=0.5, iou_threshold=0.4):
+        """
+        Initialize real-time detector.
+
+        Args:
+            onnx_model_path: Path to ONNX model file
+            conf_threshold: Confidence threshold for detections (0-1)
+            iou_threshold: IoU threshold for NMS
+        """
+        self.conf_threshold = conf_threshold
+        self.iou_threshold = iou_threshold
+
+        # Load ONNX model
+        print(f"Loading model from {onnx_model_path}...")
+        self.session = ort.InferenceSession(onnx_model_path)
+
+        # Get input/output names
+        self.input_name = self.session.get_inputs()[0].name
+        self.output_names = [output.name for output in self.session.get_outputs()]
+
+        # Get input shape
+        self.input_shape = self.session.get_inputs()[0].shape
+        self.input_height = self.input_shape[2]
+        self.input_width = self.input_shape[3]
+
+        print(f"✓ Model loaded successfully")
+        print(f"Input shape: {self.input_shape}")
+
+        # FPS calculation
+        self.fps_queue = deque(maxlen=30)
+        self.prev_time = time.time()
+
+
+    def preprocess(self, frame):
+        """
+        Preprocess frame for model input.
+
+        Steps:
+        - Resize to model input size
+        - Normalize pixel values
+        - Convert to correct format (NCHW)
+
+        Args:
+            frame: Input frame (numpy array)
+
+        Returns:
+            Preprocessed input tensor
+        """
+        # Resize frame
+        resized = cv2.resize(frame, (self.input_width, self.input_height))
+
+        # Convert BGR to RGB
+        rgb = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
+
+        # Normalize to [0, 1]
+        normalized = rgb.astype(np.float32) / 255.0
+
+        # Transpose to NCHW format (batch, channels, height, width)
+        transposed = normalized.transpose(2, 0, 1)
+
+        # Add batch dimension
+        input_tensor = np.expand_dims(transposed, axis=0)
+
+        return input_tensor
+
+
+    def postprocess(self, outputs, original_shape):
+        """
+        Post-process model outputs to get final detections.
+
+        Steps:
+        - Apply confidence threshold
+        - Apply NMS (Non-Maximum Suppression)
+        - Scale boxes to original image size
+
+        Args:
+            outputs: Raw model outputs
+            original_shape: Original frame shape (height, width)
+
+        Returns:
+            List of detections: [x1, y1, x2, y2, confidence, class_id]
+        """
+        # Extract predictions
+        predictions = outputs[0][0]
+
+        # Filter by confidence
+        mask = predictions[:, 4] > self.conf_threshold
+        filtered = predictions[mask]
+
+        if len(filtered) == 0:
+            return []
+
+        # Extract boxes, scores, class_ids
+        boxes = filtered[:, :4]
+        scores = filtered[:, 4]
+        class_ids = filtered[:, 5:].argmax(axis=1)
+
+        # Apply NMS
+        indices = cv2.dnn.NMSBoxes(
+            boxes.tolist(),
+            scores.tolist(),
+            self.conf_threshold,
+            self.iou_threshold
+        )
+
+        detections = []
+        if len(indices) > 0:
+            for i in indices.flatten():
+                box = boxes[i]
+                score = scores[i]
+                class_id = int(class_ids[i])
+
+                # Scale boxes to original image size
+                h, w = original_shape
+                x1 = int(box[0] * w / self.input_width)
+                y1 = int(box[1] * h / self.input_height)
+                x2 = int(box[2] * w / self.input_width)
+                y2 = int(box[3] * h / self.input_height)
+
+                detections.append([x1, y1, x2, y2, score, class_id])
+
+        return detections
+
+
+    def draw_detections(self, frame, detections, class_names=None):
+        """
+        Draw bounding boxes and labels on frame.
+
+        Args:
+            frame: Input frame
+            detections: List of detections
+            class_names: List of class names (optional)
+
+        Returns:
+            Frame with drawn detections
+        """
+        for detection in detections:
+            x1, y1, x2, y2, score, class_id = detection
+
+            # Draw bounding box
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+
+            # Prepare label
+            if class_names and class_id < len(class_names):
+                label = f"{class_names[class_id]}: {score:.2f}"
+            else:
+                label = f"Class {class_id}: {score:.2f}"
+
+            # Draw label background
+            (label_width, label_height), _ = cv2.getTextSize(
+                label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1
+            )
+            cv2.rectangle(
+                frame,
+                (x1, y1 - label_height - 10),
+                (x1 + label_width, y1),
+                (0, 255, 0),
+                -1
+            )
+
+            # Draw label text
+            cv2.putText(
+                frame, label, (x1, y1 - 5),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1
+            )
+
+        return frame
+
+
+    def calculate_fps(self):
+        """
+        Calculate current FPS.
+
+        Returns:
+            Current FPS value
+        """
+        current_time = time.time()
+        fps = 1 / (current_time - self.prev_time)
+        self.prev_time = current_time
+        self.fps_queue.append(fps)
+
+        return sum(self.fps_queue) / len(self.fps_queue)
+
+
+    def run_webcam(self, camera_id=0, class_names=None):
+        """
+        Run inference on webcam feed.
+
+        Args:
+            camera_id: Camera device ID (default: 0)
+            class_names: List of class names for labels
+
+        Press 'q' to quit.
+        """
+        print(f"Starting webcam inference (Camera {camera_id})...")
+        print("Press 'q' to quit")
+
+        cap = cv2.VideoCapture(camera_id)
+
+        if not cap.isOpened():
+            print(f"Error: Cannot open camera {camera_id}")
+            return
+
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            # Preprocess
+            input_tensor = self.preprocess(frame)
+
+            # Run inference
+            outputs = self.session.run(self.output_names, {self.input_name: input_tensor})
+
+            # Post-process
+            detections = self.postprocess(outputs, frame.shape[:2])
+
+            # Draw detections
+            frame = self.draw_detections(frame, detections, class_names)
+
+            # Calculate and display FPS
+            fps = self.calculate_fps()
+            cv2.putText(
+                frame, f"FPS: {fps:.1f}", (10, 30),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2
+            )
+
+            # Display frame
+            cv2.imshow('Object Detection', frame)
+
+            # Check for quit
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
+        print("✓ Webcam inference stopped")
+
+
+    def run_rtsp_stream(self, rtsp_url, class_names=None):
+        """
+        Run inference on RTSP stream.
+
+        Args:
+            rtsp_url: RTSP stream URL
+            class_names: List of class names for labels
+
+        Example:
+            rtsp_url = "rtsp://username:password@ip:port/stream"
+
+        Press 'q' to quit.
+        """
+        print(f"Connecting to RTSP stream...")
+        print(f"URL: {rtsp_url}")
+        print("Press 'q' to quit")
+
+        cap = cv2.VideoCapture(rtsp_url)
+
+        if not cap.isOpened():
+            print(f"Error: Cannot connect to RTSP stream")
+            return
+
+        print("✓ Connected to stream")
+
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                print("Connection lost. Reconnecting...")
+                cap.release()
+                time.sleep(2)
+                cap = cv2.VideoCapture(rtsp_url)
+                continue
+
+            # Preprocess
+            input_tensor = self.preprocess(frame)
+
+            # Run inference
+            outputs = self.session.run(self.output_names, {self.input_name: input_tensor})
+
+            # Post-process
+            detections = self.postprocess(outputs, frame.shape[:2])
+
+            # Draw detections
+            frame = self.draw_detections(frame, detections, class_names)
+
+            # Calculate and display FPS
+            fps = self.calculate_fps()
+            cv2.putText(
+                frame, f"FPS: {fps:.1f}", (10, 30),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2
+            )
+
+            # Display frame
+            cv2.imshow('RTSP Stream Detection', frame)
+
+            # Check for quit
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
+        print("✓ RTSP stream inference stopped")
+
+
+    def run_video_file(self, video_path, output_path=None, class_names=None):
+        """
+        Run inference on video file.
+
+        Args:
+            video_path: Path to input video file
+            output_path: Path to save output video (optional)
+            class_names: List of class names for labels
+
+        Press 'q' to quit early.
+        """
+        print(f"Processing video: {video_path}")
+
+        cap = cv2.VideoCapture(video_path)
+
+        if not cap.isOpened():
+            print(f"Error: Cannot open video file")
+            return
+
+        # Get video properties
+        fps = int(cap.get(cv2.CAP_PROP_FPS))
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+        print(f"Video info: {width}x{height} @ {fps} FPS, {total_frames} frames")
+
+        # Setup output video writer
+        writer = None
+        if output_path:
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            writer = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+            print(f"Output will be saved to: {output_path}")
+
+        frame_count = 0
+
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            frame_count += 1
+
+            # Preprocess
+            input_tensor = self.preprocess(frame)
+
+            # Run inference
+            outputs = self.session.run(self.output_names, {self.input_name: input_tensor})
+
+            # Post-process
+            detections = self.postprocess(outputs, frame.shape[:2])
+
+            # Draw detections
+            frame = self.draw_detections(frame, detections, class_names)
+
+            # Calculate and display FPS
+            fps_current = self.calculate_fps()
+            progress = (frame_count / total_frames) * 100
+
+            info_text = f"FPS: {fps_current:.1f} | Progress: {progress:.1f}% ({frame_count}/{total_frames})"
+            cv2.putText(
+                frame, info_text, (10, 30),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2
+            )
+
+            # Save frame to output video
+            if writer:
+                writer.write(frame)
+
+            # Display frame
+            cv2.imshow('Video Processing', frame)
+
+            # Check for quit
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                print("\nProcessing interrupted by user")
+                break
+
+            # Print progress
+            if frame_count % 30 == 0:
+                print(f"Processed {frame_count}/{total_frames} frames ({progress:.1f}%)")
+
+        cap.release()
+        if writer:
+            writer.release()
+        cv2.destroyAllWindows()
+
+        print(f"✓ Video processing complete")
+        if output_path:
+            print(f"✓ Output saved to: {output_path}")
+
+
+# Example usage
+if __name__ == "__main__":
+    # Initialize detector
+    detector = RealTimeDetector(
+        onnx_model_path="model.onnx",
+        conf_threshold=0.5,
+        iou_threshold=0.4
+    )
+
+    # Class names (example)
+    class_names = ['person', 'car', 'bike', 'bus', 'truck']
+
+    # Run on webcam
+    # detector.run_webcam(camera_id=0, class_names=class_names)
+
+    # Run on RTSP stream
+    # rtsp_url = "rtsp://username:password@192.168.1.100:554/stream"
+    # detector.run_rtsp_stream(rtsp_url, class_names=class_names)
+
+    # Run on video file
+    # detector.run_video_file(
+    #     video_path="input_video.mp4",
+    #     output_path="output_video.mp4",
+    #     class_names=class_names
+    # )
+```
+
+---
+
+### Model Optimization
+
+**Optimizing models for deployment:** Reduce model size and increase inference speed using quantization, pruning, and knowledge distillation. Critical for deploying on edge devices with limited resources.
+
+**File: `optimization/model_optimization.py`**
+```python
+"""
+Model Optimization Techniques
+------------------------------
+Quantization, pruning, and optimization for faster inference.
+Essential for edge device deployment and reducing latency.
+"""
+
+import torch
+import torch.nn as nn
+import numpy as np
+
+
+def quantize_pytorch_model(model, calibration_data_loader, quantized_model_path):
+    """
+    Quantize PyTorch model from FP32 to INT8.
+
+    Why quantize:
+    - 4x smaller model size
+    - 2-4x faster inference
+    - Lower memory usage
+    - Suitable for edge devices
+
+    Args:
+        model: Trained PyTorch model (FP32)
+        calibration_data_loader: DataLoader with calibration data
+        quantized_model_path: Path to save quantized model
+
+    Example:
+        Quantization reduces model from 100MB to 25MB
+        and increases inference speed from 50ms to 15ms
+    """
+    print("Quantizing PyTorch model to INT8...")
+
+    # Set model to evaluation mode
+    model.eval()
+
+    # Fuse modules (Conv + BN + ReLU)
+    model = torch.quantization.fuse_modules(model, [['conv', 'bn', 'relu']])
+
+    # Specify quantization configuration
+    model.qconfig = torch.quantization.get_default_qconfig('fbgemm')
+
+    # Prepare model for quantization
+    torch.quantization.prepare(model, inplace=True)
+
+    # Calibrate with representative dataset
+    print("Calibrating model...")
+    with torch.no_grad():
+        for batch_idx, (data, _) in enumerate(calibration_data_loader):
+            model(data)
+            if batch_idx >= 100:  # Use 100 batches for calibration
+                break
+
+    # Convert to quantized model
+    torch.quantization.convert(model, inplace=True)
+
+    # Save quantized model
+    torch.save(model.state_dict(), quantized_model_path)
+
+    print(f"✓ Quantized model saved to {quantized_model_path}")
+
+    # Compare model sizes
+    import os
+    original_size = os.path.getsize('original_model.pt') / (1024 * 1024)
+    quantized_size = os.path.getsize(quantized_model_path) / (1024 * 1024)
+
+    print(f"\nModel Size Comparison:")
+    print(f"Original (FP32): {original_size:.2f} MB")
+    print(f"Quantized (INT8): {quantized_size:.2f} MB")
+    print(f"Size reduction: {((original_size - quantized_size) / original_size * 100):.1f}%")
+
+
+def quantize_onnx_model(onnx_model_path, quantized_onnx_path, calibration_data):
+    """
+    Quantize ONNX model to INT8.
+
+    Args:
+        onnx_model_path: Path to original ONNX model
+        quantized_onnx_path: Path to save quantized model
+        calibration_data: Numpy array of calibration data
+
+    Example:
+        calibration_data = np.random.randn(100, 3, 640, 640).astype(np.float32)
+        quantize_onnx_model('model.onnx', 'model_int8.onnx', calibration_data)
+    """
+    from onnxruntime.quantization import quantize_dynamic, QuantType
+
+    print("Quantizing ONNX model to INT8...")
+
+    # Dynamic quantization (no calibration data needed)
+    quantize_dynamic(
+        onnx_model_path,
+        quantized_onnx_path,
+        weight_type=QuantType.QUInt8
+    )
+
+    print(f"✓ Quantized model saved to {quantized_onnx_path}")
+
+    # Compare model sizes
+    import os
+    original_size = os.path.getsize(onnx_model_path) / (1024 * 1024)
+    quantized_size = os.path.getsize(quantized_onnx_path) / (1024 * 1024)
+
+    print(f"\nModel Size Comparison:")
+    print(f"Original: {original_size:.2f} MB")
+    print(f"Quantized: {quantized_size:.2f} MB")
+    print(f"Size reduction: {((original_size - quantized_size) / original_size * 100):.1f}%")
+
+
+def prune_pytorch_model(model, amount=0.3):
+    """
+    Prune PyTorch model by removing less important weights.
+
+    Why prune:
+    - Reduces model size
+    - Faster inference
+    - Lower memory usage
+    - Can be combined with quantization
+
+    Args:
+        model: PyTorch model to prune
+        amount: Fraction of weights to prune (0-1)
+                0.3 = remove 30% of weights
+
+    Returns:
+        Pruned model
+    """
+    import torch.nn.utils.prune as prune
+
+    print(f"Pruning model (removing {amount*100:.1f}% of weights)...")
+
+    # Prune all Conv2d and Linear layers
+    parameters_to_prune = []
+    for module in model.modules():
+        if isinstance(module, (nn.Conv2d, nn.Linear)):
+            parameters_to_prune.append((module, 'weight'))
+
+    # Apply global unstructured pruning
+    prune.global_unstructured(
+        parameters_to_prune,
+        pruning_method=prune.L1Unstructured,
+        amount=amount,
+    )
+
+    # Make pruning permanent
+    for module, param_name in parameters_to_prune:
+        prune.remove(module, param_name)
+
+    print(f"✓ Model pruned successfully")
+
+    # Calculate sparsity
+    total_params = 0
+    zero_params = 0
+    for param in model.parameters():
+        total_params += param.numel()
+        zero_params += (param == 0).sum().item()
+
+    sparsity = zero_params / total_params * 100
+    print(f"Model sparsity: {sparsity:.1f}% (zeros: {zero_params:,} / {total_params:,})")
+
+    return model
+
+
+def benchmark_model_speed(model, input_shape=(1, 3, 640, 640), num_iterations=100, device='cuda'):
+    """
+    Benchmark model inference speed.
+
+    Measures:
+    - Average inference time
+    - FPS (frames per second)
+    - Throughput
+
+    Args:
+        model: Model to benchmark (PyTorch or ONNX session)
+        input_shape: Input tensor shape
+        num_iterations: Number of iterations for benchmarking
+        device: 'cuda' or 'cpu'
+
+    Returns:
+        Dictionary with benchmark results
+    """
+    import time
+    import torch
+
+    print(f"\nBenchmarking model on {device.upper()}...")
+    print(f"Input shape: {input_shape}")
+    print(f"Iterations: {num_iterations}")
+
+    # Create dummy input
+    if device == 'cuda':
+        dummy_input = torch.randn(input_shape).cuda()
+        model = model.cuda()
+    else:
+        dummy_input = torch.randn(input_shape)
+
+    model.eval()
+
+    # Warmup
+    print("Warming up...")
+    with torch.no_grad():
+        for _ in range(10):
+            _ = model(dummy_input)
+
+    # Benchmark
+    print("Running benchmark...")
+    times = []
+
+    with torch.no_grad():
+        for i in range(num_iterations):
+            if device == 'cuda':
+                torch.cuda.synchronize()
+
+            start_time = time.time()
+            _ = model(dummy_input)
+
+            if device == 'cuda':
+                torch.cuda.synchronize()
+
+            end_time = time.time()
+            times.append(end_time - start_time)
+
+            if (i + 1) % 20 == 0:
+                print(f"Progress: {i + 1}/{num_iterations}")
+
+    # Calculate statistics
+    avg_time = np.mean(times) * 1000  # Convert to ms
+    std_time = np.std(times) * 1000
+    min_time = np.min(times) * 1000
+    max_time = np.max(times) * 1000
+    fps = 1000 / avg_time
+
+    # Print results
+    print("\n" + "="*50)
+    print("Benchmark Results")
+    print("="*50)
+    print(f"Average time: {avg_time:.2f} ms")
+    print(f"Std deviation: {std_time:.2f} ms")
+    print(f"Min time: {min_time:.2f} ms")
+    print(f"Max time: {max_time:.2f} ms")
+    print(f"FPS: {fps:.1f}")
+    print("="*50)
+
+    return {
+        'avg_time_ms': avg_time,
+        'std_time_ms': std_time,
+        'min_time_ms': min_time,
+        'max_time_ms': max_time,
+        'fps': fps
+    }
+
+
+# Example usage
+if __name__ == "__main__":
+    # Quantization example
+    print("="*50)
+    print("Model Quantization")
+    print("="*50)
+
+    # model = torch.load('model.pt')
+    # calibration_loader = ... # Your data loader
+    # quantize_pytorch_model(model, calibration_loader, 'model_int8.pt')
+
+    # ONNX quantization
+    # quantize_onnx_model('model.onnx', 'model_int8.onnx', calibration_data)
+
+    # Pruning example
+    print("\n" + "="*50)
+    print("Model Pruning")
+    print("="*50)
+
+    # model = torch.load('model.pt')
+    # pruned_model = prune_pytorch_model(model, amount=0.3)
+    # torch.save(pruned_model, 'model_pruned.pt')
+
+    # Benchmark example
+    print("\n" + "="*50)
+    print("Speed Benchmark")
+    print("="*50)
+
+    # model = torch.load('model.pt')
+    # results = benchmark_model_speed(model, device='cuda')
+```
+
+---
+
+### Model Serving with API
+
+**Deploying model as REST API:** Serve your trained model as REST API using FastAPI. Allows easy integration with web applications, mobile apps, and other services.
+
+**File: `deployment/api_server.py`**
+```python
+"""
+Model Serving with FastAPI
+---------------------------
+Deploy object detection model as REST API.
+Supports image upload, batch processing, and real-time inference.
+"""
+
+from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.responses import JSONResponse, StreamingResponse
+from pydantic import BaseModel
+from typing import List, Optional
+import uvicorn
+import cv2
+import numpy as np
+import onnxruntime as ort
+import io
+from PIL import Image
+
+
+# Initialize FastAPI app
+app = FastAPI(
+    title="Object Detection API",
+    description="REST API for object detection using ONNX models",
+    version="1.0.0"
+)
+
+
+# Global model session
+model_session = None
+INPUT_SIZE = (640, 640)
+CONFIDENCE_THRESHOLD = 0.5
+IOU_THRESHOLD = 0.4
+
+
+class DetectionResult(BaseModel):
+    """Detection result schema"""
+    bbox: List[float]  # [x1, y1, x2, y2]
+    confidence: float
+    class_id: int
+    class_name: Optional[str] = None
+
+
+class PredictionResponse(BaseModel):
+    """API response schema"""
+    detections: List[DetectionResult]
+    inference_time_ms: float
+    image_size: List[int]  # [width, height]
+
+
+@app.on_event("startup")
+async def load_model():
+    """
+    Load ONNX model on startup.
+
+    This runs once when server starts.
+    Model stays loaded in memory for fast inference.
+    """
+    global model_session
+
+    model_path = "model.onnx"  # Change to your model path
+
+    print(f"Loading model from {model_path}...")
+    model_session = ort.InferenceSession(model_path)
+    print("✓ Model loaded successfully")
+
+
+def preprocess_image(image: np.ndarray) -> np.ndarray:
+    """
+    Preprocess image for model input.
+
+    Args:
+        image: Input image (BGR format)
+
+    Returns:
+        Preprocessed tensor ready for inference
+    """
+    # Resize
+    resized = cv2.resize(image, INPUT_SIZE)
+
+    # Convert BGR to RGB
+    rgb = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
+
+    # Normalize
+    normalized = rgb.astype(np.float32) / 255.0
+
+    # Transpose to NCHW
+    transposed = normalized.transpose(2, 0, 1)
+
+    # Add batch dimension
+    input_tensor = np.expand_dims(transposed, axis=0)
+
+    return input_tensor
+
+
+def postprocess_predictions(outputs, original_shape, class_names=None):
+    """
+    Post-process model outputs.
+
+    Args:
+        outputs: Raw model outputs
+        original_shape: Original image shape (height, width)
+        class_names: List of class names (optional)
+
+    Returns:
+        List of DetectionResult objects
+    """
+    predictions = outputs[0][0]
+
+    # Filter by confidence
+    mask = predictions[:, 4] > CONFIDENCE_THRESHOLD
+    filtered = predictions[mask]
+
+    if len(filtered) == 0:
+        return []
+
+    # Extract boxes, scores, class_ids
+    boxes = filtered[:, :4]
+    scores = filtered[:, 4]
+    class_ids = filtered[:, 5:].argmax(axis=1)
+
+    # Apply NMS
+    indices = cv2.dnn.NMSBoxes(
+        boxes.tolist(),
+        scores.tolist(),
+        CONFIDENCE_THRESHOLD,
+        IOU_THRESHOLD
+    )
+
+    detections = []
+    if len(indices) > 0:
+        for i in indices.flatten():
+            box = boxes[i]
+            score = float(scores[i])
+            class_id = int(class_ids[i])
+
+            # Scale to original size
+            h, w = original_shape
+            x1 = float(box[0] * w / INPUT_SIZE[0])
+            y1 = float(box[1] * h / INPUT_SIZE[1])
+            x2 = float(box[2] * w / INPUT_SIZE[0])
+            y2 = float(box[3] * h / INPUT_SIZE[1])
+
+            # Get class name if provided
+            class_name = None
+            if class_names and class_id < len(class_names):
+                class_name = class_names[class_id]
+
+            detection = DetectionResult(
+                bbox=[x1, y1, x2, y2],
+                confidence=score,
+                class_id=class_id,
+                class_name=class_name
+            )
+            detections.append(detection)
+
+    return detections
+
+
+@app.get("/")
+async def root():
+    """API root endpoint"""
+    return {
+        "message": "Object Detection API",
+        "version": "1.0.0",
+        "endpoints": {
+            "/predict": "POST - Upload image for detection",
+            "/predict/batch": "POST - Batch image detection",
+            "/health": "GET - Health check"
+        }
+    }
+
+
+@app.get("/health")
+async def health_check():
+    """
+    Health check endpoint.
+
+    Returns model status and system info.
+    """
+    return {
+        "status": "healthy",
+        "model_loaded": model_session is not None,
+        "input_size": INPUT_SIZE,
+        "confidence_threshold": CONFIDENCE_THRESHOLD,
+        "iou_threshold": IOU_THRESHOLD
+    }
+
+
+@app.post("/predict", response_model=PredictionResponse)
+async def predict(file: UploadFile = File(...), class_names: Optional[List[str]] = None):
+    """
+    Run object detection on uploaded image.
+
+    Args:
+        file: Image file (JPEG, PNG)
+        class_names: Optional list of class names
+
+    Returns:
+        Detection results with bounding boxes, confidence scores
+
+    Example:
+        curl -X POST "http://localhost:8000/predict" \
+             -F "file=@image.jpg"
+    """
+    if model_session is None:
+        raise HTTPException(status_code=503, detail="Model not loaded")
+
+    try:
+        # Read image
+        contents = await file.read()
+        nparr = np.frombuffer(contents, np.uint8)
+        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+        if image is None:
+            raise HTTPException(status_code=400, detail="Invalid image file")
+
+        original_shape = image.shape[:2]
+
+        # Preprocess
+        input_tensor = preprocess_image(image)
+
+        # Run inference
+        import time
+        start_time = time.time()
+
+        input_name = model_session.get_inputs()[0].name
+        output_names = [output.name for output in model_session.get_outputs()]
+        outputs = model_session.run(output_names, {input_name: input_tensor})
+
+        inference_time = (time.time() - start_time) * 1000  # Convert to ms
+
+        # Post-process
+        detections = postprocess_predictions(outputs, original_shape, class_names)
+
+        # Prepare response
+        response = PredictionResponse(
+            detections=detections,
+            inference_time_ms=round(inference_time, 2),
+            image_size=[image.shape[1], image.shape[0]]
+        )
+
+        return response
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/predict/batch")
+async def predict_batch(files: List[UploadFile] = File(...)):
+    """
+    Run detection on multiple images.
+
+    Args:
+        files: List of image files
+
+    Returns:
+        List of detection results for each image
+
+    Example:
+        curl -X POST "http://localhost:8000/predict/batch" \
+             -F "files=@image1.jpg" \
+             -F "files=@image2.jpg"
+    """
+    if model_session is None:
+        raise HTTPException(status_code=503, detail="Model not loaded")
+
+    results = []
+
+    for file in files:
+        try:
+            # Read image
+            contents = await file.read()
+            nparr = np.frombuffer(contents, np.uint8)
+            image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+            if image is None:
+                results.append({
+                    "filename": file.filename,
+                    "error": "Invalid image file"
+                })
+                continue
+
+            original_shape = image.shape[:2]
+
+            # Preprocess
+            input_tensor = preprocess_image(image)
+
+            # Run inference
+            import time
+            start_time = time.time()
+
+            input_name = model_session.get_inputs()[0].name
+            output_names = [output.name for output in model_session.get_outputs()]
+            outputs = model_session.run(output_names, {input_name: input_tensor})
+
+            inference_time = (time.time() - start_time) * 1000
+
+            # Post-process
+            detections = postprocess_predictions(outputs, original_shape)
+
+            results.append({
+                "filename": file.filename,
+                "detections": [det.dict() for det in detections],
+                "inference_time_ms": round(inference_time, 2)
+            })
+
+        except Exception as e:
+            results.append({
+                "filename": file.filename,
+                "error": str(e)
+            })
+
+    return JSONResponse(content={"results": results})
+
+
+if __name__ == "__main__":
+    # Run server
+    print("Starting Object Detection API Server...")
+    print("API Docs: http://localhost:8000/docs")
+    print("Health Check: http://localhost:8000/health")
+
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=8000,
+        log_level="info"
+    )
+```
+
+**Client example to test API:**
+
+**File: `deployment/api_client.py`**
+```python
+"""
+API Client Example
+------------------
+Test object detection API with images.
+"""
+
+import requests
+import json
+
+
+def test_single_image(image_path, api_url="http://localhost:8000/predict"):
+    """
+    Test API with single image.
+
+    Args:
+        image_path: Path to image file
+        api_url: API endpoint URL
+    """
+    print(f"Testing API with: {image_path}")
+
+    # Open image file
+    with open(image_path, 'rb') as f:
+        files = {'file': f}
+        response = requests.post(api_url, files=files)
+
+    if response.status_code == 200:
+        result = response.json()
+        print(f"\n✓ Detection successful!")
+        print(f"Inference time: {result['inference_time_ms']:.2f} ms")
+        print(f"Detections: {len(result['detections'])}")
+
+        for idx, det in enumerate(result['detections']):
+            print(f"\nDetection {idx + 1}:")
+            print(f"  Class ID: {det['class_id']}")
+            print(f"  Confidence: {det['confidence']:.3f}")
+            print(f"  Bbox: {det['bbox']}")
+    else:
+        print(f"Error: {response.status_code}")
+        print(response.text)
+
+
+def test_batch_images(image_paths, api_url="http://localhost:8000/predict/batch"):
+    """
+    Test API with multiple images.
+
+    Args:
+        image_paths: List of image file paths
+        api_url: API endpoint URL
+    """
+    print(f"Testing API with {len(image_paths)} images")
+
+    files = [('files', open(path, 'rb')) for path in image_paths]
+
+    response = requests.post(api_url, files=files)
+
+    # Close files
+    for _, f in files:
+        f.close()
+
+    if response.status_code == 200:
+        results = response.json()['results']
+        print(f"\n✓ Batch processing successful!")
+
+        for result in results:
+            print(f"\nFile: {result['filename']}")
+            if 'error' in result:
+                print(f"  Error: {result['error']}")
+            else:
+                print(f"  Detections: {len(result['detections'])}")
+                print(f"  Time: {result['inference_time_ms']:.2f} ms")
+    else:
+        print(f"Error: {response.status_code}")
+        print(response.text)
+
+
+if __name__ == "__main__":
+    # Test single image
+    test_single_image("test_image.jpg")
+
+    # Test batch
+    # test_batch_images(["image1.jpg", "image2.jpg", "image3.jpg"])
+```
+
+---
+
+### Common Issues & Troubleshooting
+
+**Resolving common errors:** When working with object detection models, you'll encounter various issues. Here are solutions to most common problems.
+
+**1: CUDA Out of Memory Error**
+
+```python
+"""
+Problem: RuntimeError: CUDA out of memory
+
+Solution: Reduce batch size or use gradient accumulation
+"""
+
+# Bad - Large batch size
+batch_size = 32  # Too large, causes OOM
+
+# Good - Smaller batch with gradient accumulation
+batch_size = 8
+accumulation_steps = 4  # Effective batch size = 8 * 4 = 32
+
+optimizer.zero_grad()
+for i, (images, targets) in enumerate(train_loader):
+    loss = model(images, targets)
+    loss = loss / accumulation_steps
+    loss.backward()
+
+    if (i + 1) % accumulation_steps == 0:
+        optimizer.step()
+        optimizer.zero_grad()
+```
+
+**2: CUDA Not Available**
+
+```python
+"""
+Problem: torch.cuda.is_available() returns False
+
+Solutions:
+"""
+
+# Check CUDA installation
+import torch
+print(f"PyTorch version: {torch.__version__}")
+print(f"CUDA available: {torch.cuda.is_available()}")
+print(f"CUDA version: {torch.version.cuda}")
+
+# If False, reinstall PyTorch with CUDA:
+# pip uninstall torch torchvision
+# pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+
+# Or use CPU fallback
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+model = model.to(device)
+```
+
+**3: Slow Training Speed**
+
+```python
+"""
+Problem: Training is very slow
+
+Solutions:
+"""
+
+# 1. Use mixed precision training (FP16)
+from torch.cuda.amp import autocast, GradScaler
+
+scaler = GradScaler()
+
+for images, targets in train_loader:
+    optimizer.zero_grad()
+
+    with autocast():  # Use FP16
+        loss = model(images, targets)
+
+    scaler.scale(loss).backward()
+    scaler.step(optimizer)
+    scaler.update()
+
+# 2. Use multiple workers for data loading
+train_loader = DataLoader(
+    dataset,
+    batch_size=16,
+    num_workers=4,  # Use multiple CPU cores
+    pin_memory=True  # Faster data transfer to GPU
+)
+
+# 3. Use DataParallel for multiple GPUs
+if torch.cuda.device_count() > 1:
+    model = nn.DataParallel(model)
+```
+
+**4: Model Not Learning (Loss Not Decreasing)**
+
+```python
+"""
+Problem: Training loss stays constant or increases
+
+Solutions:
+"""
+
+# 1. Check learning rate
+learning_rate = 0.001  # Try different values: 0.0001, 0.01
+
+# 2. Use learning rate scheduler
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+
+scheduler = ReduceLROnPlateau(optimizer, mode='min', patience=3, factor=0.5)
+
+for epoch in range(num_epochs):
+    train_loss = train_one_epoch()
+    scheduler.step(train_loss)
+
+# 3. Check data normalization
+# Images should be normalized to [0, 1] or [-1, 1]
+images = images / 255.0
+
+# 4. Verify labels are correct
+print(f"Sample labels: {targets[:5]}")
+print(f"Label range: min={targets.min()}, max={targets.max()}")
+```
+
+**5: Poor mAP After Training**
+
+```python
+"""
+Problem: Model achieves low mAP on validation set
+
+Solutions:
+"""
+
+# 1. Train longer
+epochs = 100  # Instead of 50
+
+# 2. Use data augmentation
+from torchvision import transforms
+
+transform = transforms.Compose([
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.ColorJitter(brightness=0.2, contrast=0.2),
+    transforms.RandomRotation(degrees=10),
+])
+
+# 3. Adjust confidence and IoU thresholds
+conf_threshold = 0.25  # Lower threshold finds more objects
+iou_threshold = 0.45   # Adjust based on validation results
+
+# 4. Check for class imbalance
+from collections import Counter
+class_counts = Counter([label for labels in dataset for label in labels])
+print(f"Class distribution: {class_counts}")
+
+# Use weighted loss for imbalanced classes
+class_weights = compute_class_weights(class_counts)
+criterion = nn.CrossEntropyLoss(weight=class_weights)
+```
+
+**6: Inference Too Slow**
+
+```python
+"""
+Problem: Model inference is too slow for real-time use
+
+Solutions:
+"""
+
+# 1. Use model.eval() and torch.no_grad()
+model.eval()
+with torch.no_grad():
+    predictions = model(image)
+
+# 2. Reduce input size
+input_size = (416, 416)  # Instead of (640, 640)
+
+# 3. Use TensorRT or ONNX Runtime
+# Convert to ONNX first, then use ONNX Runtime
+session = ort.InferenceSession("model.onnx")
+
+# 4. Batch multiple images together
+batch = torch.stack([img1, img2, img3, img4])
+predictions = model(batch)  # Process 4 images at once
+```
+
+**7: OpenCV Video Capture Not Working**
+
+```python
+"""
+Problem: cv2.VideoCapture() fails to open camera/stream
+
+Solutions:
+"""
+
+# 1. Check camera index
+for i in range(5):
+    cap = cv2.VideoCapture(i)
+    if cap.isOpened():
+        print(f"Camera {i} is available")
+        cap.release()
+
+# 2. For RTSP streams, add parameters
+rtsp_url = "rtsp://username:password@ip:port/stream"
+cap = cv2.VideoCapture(rtsp_url, cv2.CAP_FFMPEG)
+cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # Reduce latency
+
+# 3. Check video file path
+import os
+if not os.path.exists(video_path):
+    print(f"Error: File not found: {video_path}")
+```
+
+---
+
+### Best Practices Summary
+
+**Production deployment checklist:** Follow these guidelines for deploying object detection models in production.
+
+**Performance:**
+- Always use model.eval() during inference
+- Use torch.no_grad() to reduce memory usage
+- Batch images when possible for higher throughput
+- Use GPU for training, consider CPU for edge deployment
+- Profile code to find bottlenecks
+
+**Model Optimization:**
+- Export to ONNX for framework-independent deployment
+- Apply quantization for 4x size reduction
+- Use pruning to remove unnecessary weights
+- Benchmark on target hardware before deployment
+
+**Data Quality:**
+- Clean dataset before training (remove duplicates, corrupted images)
+- Use train/val/test split (70/15/15)
+- Apply data augmentation for better generalization
+- Balance classes to avoid bias
+
+**Monitoring:**
+- Track FPS and latency in production
+- Log failed predictions for debugging
+- Monitor GPU/CPU usage and memory
+- Set up alerts for performance degradation
+
+**Security:**
+- Validate all input images
+- Set file size limits for API uploads
+- Rate limit API requests
+- Use authentication for production APIs
