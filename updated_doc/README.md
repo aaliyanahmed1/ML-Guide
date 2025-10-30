@@ -1141,4 +1141,785 @@ if __name__ == "__main__":
     )
 ```
 
-Due to length constraints, I need to continue in the next message. Should I continue with the rest of the sections?
+---
+
+#### Data Augmentation
+
+**Increasing dataset diversity:** This step of data-preprocessing plays vital role in model performance and generalization. This step includes rotation, flipping (horizontal/vertical) to increase diversity, scaling by zooming in/out to simulate objects at different distances, and brightness adjustment to simulate different lighting conditions like sunlight or cloudy weather. By training model on images with varying brightness, it learns to recognize objects accurately regardless of environmental changes. This helps reduce false positives and improves the model's performance for every condition.
+
+**File: `preprocessing/data_augmentation.py`**
+```python
+"""
+Data Augmentation Script
+-------------------------
+Apply various transformations to increase dataset diversity.
+Critical for improving model generalization and robustness.
+"""
+
+import cv2
+import numpy as np
+import os
+from PIL import Image, ImageEnhance
+import random
+
+
+def augment_dataset(input_folder, output_folder, augmentations_per_image=5):
+    """
+    Apply data augmentation to increase dataset size and diversity.
+
+    Why augment:
+    - Helps model generalize better to new data
+    - Prevents overfitting to training samples
+    - Simulates real-world variations (lighting, angles, etc.)
+    - Increases effective dataset size without collecting new images
+
+    Augmentation techniques applied:
+    - Horizontal/Vertical flipping
+    - Rotation (random angles)
+    - Brightness adjustment
+    - Scaling (zoom in/out)
+    - Noise addition
+
+    Args:
+        input_folder: Source folder containing original images
+        output_folder: Destination folder for augmented images
+        augmentations_per_image: Number of augmented versions per image
+
+    Example:
+        If you have 100 images and augmentations_per_image=5:
+        Output = 100 original + 500 augmented = 600 total images
+    """
+    os.makedirs(output_folder, exist_ok=True)
+
+    # Get all image files
+    image_files = [f for f in os.listdir(input_folder)
+                   if f.lower().endswith(('.jpg', '.jpeg', '.png', '.bmp'))]
+
+    print(f"Augmenting {len(image_files)} images...")
+
+    for idx, filename in enumerate(image_files):
+        input_path = os.path.join(input_folder, filename)
+        base_name = os.path.splitext(filename)[0]
+        extension = os.path.splitext(filename)[1]
+
+        # Read original image
+        img = cv2.imread(input_path)
+
+        # Save original image to output folder
+        output_path = os.path.join(output_folder, filename)
+        cv2.imwrite(output_path, img)
+
+        # Generate augmented versions
+        for aug_idx in range(augmentations_per_image):
+            # Apply random augmentations
+            augmented_img = apply_random_augmentation(img.copy())
+
+            # Save augmented image
+            aug_filename = f"{base_name}_aug_{aug_idx}{extension}"
+            aug_path = os.path.join(output_folder, aug_filename)
+            cv2.imwrite(aug_path, augmented_img)
+
+        if (idx + 1) % 50 == 0:
+            print(f"Processed {idx + 1}/{len(image_files)} images")
+
+    total_images = len(image_files) * (1 + augmentations_per_image)
+    print(f"\n✓ Augmentation complete!")
+    print(f"Original images: {len(image_files)}")
+    print(f"Total images (including augmented): {total_images}")
+
+
+def apply_random_augmentation(img):
+    """
+    Apply random augmentation techniques to an image.
+
+    Args:
+        img: Input image (numpy array from OpenCV)
+
+    Returns:
+        Augmented image
+    """
+    # Randomly choose which augmentations to apply
+    augmentations = [
+        flip_horizontal,
+        flip_vertical,
+        rotate_random,
+        adjust_brightness,
+        scale_image,
+        add_noise
+    ]
+
+    # Apply 1-3 random augmentations
+    num_augs = random.randint(1, 3)
+    selected_augs = random.sample(augmentations, num_augs)
+
+    for aug_func in selected_augs:
+        img = aug_func(img)
+
+    return img
+
+
+def flip_horizontal(img):
+    """Flip image horizontally (left-right)."""
+    return cv2.flip(img, 1)
+
+
+def flip_vertical(img):
+    """Flip image vertically (top-bottom)."""
+    return cv2.flip(img, 0)
+
+
+def rotate_random(img):
+    """Rotate image by random angle (-30 to 30 degrees)."""
+    angle = random.randint(-30, 30)
+    height, width = img.shape[:2]
+    center = (width // 2, height // 2)
+
+    # Get rotation matrix
+    rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
+
+    # Perform rotation
+    rotated = cv2.warpAffine(img, rotation_matrix, (width, height),
+                             borderMode=cv2.BORDER_REFLECT)
+    return rotated
+
+
+def adjust_brightness(img):
+    """Adjust image brightness randomly (0.5x to 1.5x)."""
+    # Convert to PIL for brightness adjustment
+    pil_img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+
+    # Random brightness factor
+    factor = random.uniform(0.5, 1.5)
+    enhancer = ImageEnhance.Brightness(pil_img)
+    brightened = enhancer.enhance(factor)
+
+    # Convert back to OpenCV format
+    return cv2.cvtColor(np.array(brightened), cv2.COLOR_RGB2BGR)
+
+
+def scale_image(img):
+    """Scale (zoom) image randomly (0.8x to 1.2x)."""
+    scale = random.uniform(0.8, 1.2)
+    height, width = img.shape[:2]
+
+    # Calculate new dimensions
+    new_height = int(height * scale)
+    new_width = int(width * scale)
+
+    # Resize image
+    scaled = cv2.resize(img, (new_width, new_height))
+
+    # Crop or pad to original size
+    if scale > 1.0:
+        # Crop from center
+        start_y = (new_height - height) // 2
+        start_x = (new_width - width) // 2
+        scaled = scaled[start_y:start_y+height, start_x:start_x+width]
+    else:
+        # Pad to original size
+        pad_y = (height - new_height) // 2
+        pad_x = (width - new_width) // 2
+        scaled = cv2.copyMakeBorder(scaled, pad_y, height-new_height-pad_y,
+                                   pad_x, width-new_width-pad_x,
+                                   cv2.BORDER_REFLECT)
+
+    return scaled
+
+
+def add_noise(img):
+    """Add random Gaussian noise to image."""
+    # Generate Gaussian noise
+    noise = np.random.normal(0, 25, img.shape).astype(np.uint8)
+
+    # Add noise to image
+    noisy = cv2.add(img, noise)
+
+    return noisy
+
+
+# Example usage
+if __name__ == "__main__":
+    augment_dataset(
+        input_folder="dataset/train/images",
+        output_folder="dataset/train/augmented",
+        augmentations_per_image=5  # Creates 5 augmented versions per image
+    )
+```
+
+---
+
+#### Format Checking/Conversion
+
+**Ensuring correct annotation format:** Every model has its own specific annotation format for reading labels. Annotations must be in the correct format.
+
+**YOLO Format**: YOLO models use TXT file as label file containing (class + bounding boxes x, y coordinates) for each image file and names of both files image and label file should be exact same.
+Example: "Image-1.jpg = image-1.txt"
+
+![Yolo format labels file](/images/yololabel.png)
+
+**Detectron2, Faster R-CNN, Mask R-CNN, RF-DETR**: These models take JSON files as annotations. This file contains the metadata of the dataset including the information of each image (filename, size), the objects in each image (bounding boxes, categories of the object like class) and also the list of all objects/classes. Annotations are linked to the corresponding images using ids.
+
+![json file structure](/images/examplee.png)
+
+**File: `preprocessing/format_conversion.py`**
+```python
+"""
+Annotation Format Conversion Script
+------------------------------------
+Convert between different annotation formats (YOLO, COCO, Pascal VOC).
+Essential for using datasets with different models.
+"""
+
+import json
+import os
+from pathlib import Path
+
+
+def yolo_to_coco(yolo_labels_folder, images_folder, output_json, class_names):
+    """
+    Convert YOLO format annotations to COCO JSON format.
+
+    YOLO format (per image, .txt file):
+        class_id center_x center_y width height (normalized 0-1)
+
+    COCO format (single .json file):
+        {
+            "images": [...],
+            "annotations": [...],
+            "categories": [...]
+        }
+
+    Args:
+        yolo_labels_folder: Folder containing YOLO .txt label files
+        images_folder: Folder containing corresponding images
+        output_json: Path to output COCO JSON file
+        class_names: List of class names ['car', 'person', ...]
+    """
+    coco_data = {
+        "images": [],
+        "annotations": [],
+        "categories": []
+    }
+
+    # Create categories
+    for idx, class_name in enumerate(class_names):
+        coco_data["categories"].append({
+            "id": idx,
+            "name": class_name,
+            "supercategory": "object"
+        })
+
+    annotation_id = 1
+    image_id = 1
+
+    # Process each image
+    for image_file in os.listdir(images_folder):
+        if not image_file.lower().endswith(('.jpg', '.jpeg', '.png')):
+            continue
+
+        # Get image dimensions
+        from PIL import Image
+        img_path = os.path.join(images_folder, image_file)
+        img = Image.open(img_path)
+        img_width, img_height = img.size
+
+        # Add image info
+        coco_data["images"].append({
+            "id": image_id,
+            "file_name": image_file,
+            "width": img_width,
+            "height": img_height
+        })
+
+        # Read YOLO labels
+        label_file = os.path.splitext(image_file)[0] + '.txt'
+        label_path = os.path.join(yolo_labels_folder, label_file)
+
+        if os.path.exists(label_path):
+            with open(label_path, 'r') as f:
+                for line in f.readlines():
+                    # Parse YOLO format: class_id center_x center_y width height
+                    parts = line.strip().split()
+                    class_id = int(parts[0])
+                    center_x = float(parts[1]) * img_width
+                    center_y = float(parts[2]) * img_height
+                    bbox_width = float(parts[3]) * img_width
+                    bbox_height = float(parts[4]) * img_height
+
+                    # Convert to COCO format (x, y, width, height)
+                    # where (x, y) is top-left corner
+                    x = center_x - (bbox_width / 2)
+                    y = center_y - (bbox_height / 2)
+
+                    # Add annotation
+                    coco_data["annotations"].append({
+                        "id": annotation_id,
+                        "image_id": image_id,
+                        "category_id": class_id,
+                        "bbox": [x, y, bbox_width, bbox_height],
+                        "area": bbox_width * bbox_height,
+                        "iscrowd": 0
+                    })
+                    annotation_id += 1
+
+        image_id += 1
+
+    # Save COCO JSON
+    with open(output_json, 'w') as f:
+        json.dump(coco_data, f, indent=2)
+
+    print(f"✓ Converted YOLO to COCO format")
+    print(f"Output: {output_json}")
+    print(f"Images: {len(coco_data['images'])}")
+    print(f"Annotations: {len(coco_data['annotations'])}")
+
+
+def coco_to_yolo(coco_json, output_folder):
+    """
+    Convert COCO JSON format to YOLO format.
+
+    Args:
+        coco_json: Path to COCO JSON file
+        output_folder: Folder to save YOLO .txt label files
+    """
+    os.makedirs(output_folder, exist_ok=True)
+
+    # Load COCO data
+    with open(coco_json, 'r') as f:
+        coco_data = json.load(f)
+
+    # Create image_id to filename mapping
+    image_info = {img['id']: img for img in coco_data['images']}
+
+    # Group annotations by image
+    annotations_by_image = {}
+    for ann in coco_data['annotations']:
+        image_id = ann['image_id']
+        if image_id not in annotations_by_image:
+            annotations_by_image[image_id] = []
+        annotations_by_image[image_id].append(ann)
+
+    # Convert each image's annotations
+    for image_id, annotations in annotations_by_image.items():
+        img = image_info[image_id]
+        img_width = img['width']
+        img_height = img['height']
+
+        # Create YOLO label file
+        label_filename = os.path.splitext(img['file_name'])[0] + '.txt'
+        label_path = os.path.join(output_folder, label_filename)
+
+        with open(label_path, 'w') as f:
+            for ann in annotations:
+                # Get COCO bbox (x, y, width, height)
+                x, y, width, height = ann['bbox']
+                category_id = ann['category_id']
+
+                # Convert to YOLO format (normalized center coordinates)
+                center_x = (x + width / 2) / img_width
+                center_y = (y + height / 2) / img_height
+                norm_width = width / img_width
+                norm_height = height / img_height
+
+                # Write YOLO format
+                f.write(f"{category_id} {center_x} {center_y} {norm_width} {norm_height}\n")
+
+    print(f"✓ Converted COCO to YOLO format")
+    print(f"Output folder: {output_folder}")
+    print(f"Created {len(annotations_by_image)} label files")
+
+
+# Example usage
+if __name__ == "__main__":
+    # Convert YOLO to COCO
+    yolo_to_coco(
+        yolo_labels_folder="dataset/labels",
+        images_folder="dataset/images",
+        output_json="dataset/annotations.json",
+        class_names=['car', 'person', 'bike']
+    )
+
+    # Convert COCO to YOLO
+    coco_to_yolo(
+        coco_json="dataset/annotations.json",
+        output_folder="dataset/yolo_labels"
+    )
+```
+
+---
+
+### Data Preprocessing Platform
+
+**[Roboflow](https://roboflow.com/)**
+
+It's a web-based tool that has functionality to organize the data, preprocess including augmentation and format conversion among all the different models. It allows users to upload their dataset and annotate it, augment it, select the model and it will generate well balanced dataset including the Train & Test. It allows you to train model in it as well on some free credits, and then you can choose the "paid version".
+
+![](/images/roboflow.png)
+![](/images/code_snipper.png)
+
+It guides you through all the necessary steps you need to complete and then generates an API key for direct dataset integration via API or as a downloadable .zip file.
+
+Here you can select the model format.
+![](/images/format.png)
+
+---
+
+### Dataset Collection
+
+**Finding datasets:** Now comes the main part that where to find and get the dataset to train model, so the universal platform where multiple datasets are available is [Kaggle](https://www.kaggle.com/). It's widely used and most of the general datasets are available on it for free (check for the license of usage for each).
+
+**Video Frames**
+
+In case if dataset isn't available on this platform then we have second option: fetching frames from videos and real-time recordings and then defining the objects names. Let's assume you are collecting dataset for any company that has some products and they want to count all of them on the last stage of conveyor belt to count the production of units. So object can be anything special and not available, so then it comes that way of collecting dataset from the video recordings, just taking the video of those products where they are (e.g., on the conveyor belt) and then extracting frames from it using program as well (PYTHON).
+
+This is the simple Python code snippet that can be used to extract frames from the videos to collect the dataset.
+
+**File: `dataset_collection/extract_frames.py`**
+```python
+"""
+Video Frame Extraction Script
+------------------------------
+Extract frames from video files to collect dataset images.
+Useful when you don't have existing dataset.
+"""
+
+import cv2
+import os
+
+
+def extract_frames_from_video(video_path, num_frames_to_extract, output_folder):
+    """
+    Extract frames from video file.
+
+    Use this when:
+    - No existing dataset available
+    - Need to collect custom object images
+    - Have surveillance footage or recorded videos
+
+    Args:
+        video_path: Path to input video file
+        num_frames_to_extract: Number of frames to extract
+        output_folder: Output directory for extracted frames
+
+    Example:
+        extract_frames_from_video(
+            "conveyor_belt_recording.mp4",
+            1000,
+            "dataset/raw_frames"
+        )
+    """
+    os.makedirs(output_folder, exist_ok=True)
+    cap = cv2.VideoCapture(video_path)
+
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
+
+    print(f"Video info:")
+    print(f"Total frames: {total_frames}")
+    print(f"FPS: {fps}")
+    print(f"Duration: {total_frames/fps:.2f} seconds")
+
+    # Calculate frame interval to get evenly distributed frames
+    interval = total_frames // num_frames_to_extract
+
+    count = 0
+    extracted = 0
+
+    while extracted < num_frames_to_extract:
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        # Extract frame at intervals
+        if count % interval == 0:
+            frame_filename = f"{output_folder}/frame_{extracted:05d}.jpg"
+            cv2.imwrite(frame_filename, frame)
+            print(f"Saved frame {extracted + 1}/{num_frames_to_extract}")
+            extracted += 1
+
+        count += 1
+
+    cap.release()
+    print(f"\n✓ Extracted {extracted} frames to {output_folder}")
+
+
+# Example usage
+if __name__ == "__main__":
+    # Set your variables here
+    video_path = "input_video.mp4"
+    num_frames_to_extract = 500
+    output_folder = "dataset/frames"
+
+    extract_frames_from_video(video_path, num_frames_to_extract, output_folder)
+```
+
+After you have collected your dataset images, you can use Roboflow to annotate them and convert the dataset into the format required by your model.
+
+[Tutorial](https://youtu.be/Dk-6MCQ9j-c?si=dIzQyNsWWxoysQLV) - Complete guide how to prepare the dataset and getting it ready for the training.
+
+---
+
+## Training
+
+**Understanding the training process:** This step is similar to training any human being for doing a specific task. So like that AI models are also trained on the specific dataset to perform predictions based on the patterns learned from the dataset. To start the training firstly we prepare dataset (discussed earlier), then selecting a specific architecture of the model. We can do this by fine-tuning an existing pre-trained model (YOLO, RT-DETR etc) or by defining a custom architecture of the model using frameworks like PyTorch, TensorFlow, Keras etc. These frameworks provide libraries and packages to define, train, test and evaluate models.
+
+When setting up for the training, hyperparameters are configured to control and manage the learning process. They influence how the training progresses and they directly impact the model's performance and efficiency. Like how, hyperparameters determine how quickly and effectively model learns from patterns of the data. Hyperparameters are epochs, learning rate, batch size, momentum and weight decay etc. Let's have a simple overview of each and see what is role of each hyperparameter for affecting the training process at all.
+
+**Learning Rate**: Very crucial unit for the training process like it covers the 70% of the model efficiency during training process because it defines the steps models need to take to learn patterns from the data. It controls how much model's weights are updated during training. Too high can unstable the model training and too low can slowdown the training.
+
+**Batch Size**: Number of random samples from the dataset are processed before model updates its weights.
+
+**Epochs**: Number of times entire training dataset is passed through the model. More epochs let the model learn better. More epochs more iteration over the dataset and more detail learning.
+
+**Momentum**: Used in optimizers to accelerate in consistent directions improving convergence speed.
+
+**Weight Decay**: A regularization term added to prevent overfitting by penalizing large weights.
+
+---
+
+### PyTorch
+
+**PyTorch framework:** Its an open-source framework that provides tools to build, train, and fine-tune models (neural networks). It provides each step we need to make a working model. It has vast network of libraries:
+- torch for core operations and inference applications
+- torchvision for computer vision image processing work. It has preloaded datasets that we can just import from library and the pretrained models that can be loaded to finetune them and also it provides the structure for defining custom models for different tasks
+- torchaudio for audio processing
+- torchtext for natural language processing tasks
+
+Minimal implementation of the PyTorch code for fine-tuning (training) object detection model on custom dataset.
+
+[Training](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Pytorch/_training.py)
+
+And this one is for inference:
+
+[Inference](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Pytorch/_inference.py)
+
+**Code implementation examples:**
+- [torch](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Pytorch/torch_.py)
+- [torchaudio](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Pytorch/torchaudio_.py)
+- [torchvision](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Pytorch/torchvision_.py)
+
+#### Official documentations of framework/references:
+- [Docs](https://docs.pytorch.org/tutorials/beginner/basics/buildmodel_tutorial.html) - This documentation covers everything need to define a custom neural network/model using PyTorch
+- [Explanation of neural network](https://docs.pytorch.org/tutorials/beginner/basics/buildmodel_tutorial.html)
+- [Fine-tuning using torchvision](https://docs.pytorch.org/tutorials/intermediate/torchvision_tutorial.html)
+
+---
+
+### TensorFlow
+
+**TensorFlow framework:** Its an open-source framework for building training and deploying AI models. It also provides libraries and architectures to build custom neural network/models and also some pre-trained models for inference, pre-loaded datasets, post-processing and preprocessing tools for datasets handling. Major libraries from TensorFlow and their code implementations:
+
+"tensorflow" core library for defining models performing operations and training models:
+[tensorflow](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tensorflow_core.py)
+
+tensorflow_hub its model zoo of the TensorFlow a great repository for reusable pre-trained models to fine-tune and integrate them directly into the applications:
+[tensorflow_hub](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tensorflow_hub_.py)
+
+tf.data for loading, preprocessing and handling dataset:
+[tf.data](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tf_data.py)
+
+tf.image utilities for image processing tasks:
+[tf.image](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tf_image.py)
+
+[Object detection with TensorFlow](https://www.tensorflow.org/hub/tutorials/tf2_object_detection)
+[Inference](https://github.com/aaliyanahmed1/tensorflow_/blob/main/tf2_object_detection.ipynb)
+
+[Action recognition from video](https://www.tensorflow.org/hub/tutorials/action_recognition_with_tf_hub) - Recognizing action and events from the videos using TensorFlow.
+
+This TensorFlow implementation contains deep detailed explanation of fine-tuning an object detection model on custom dataset. All are pretrained and preloaded in TensorFlow no need to download them manually. All of stuff is built-in.
+
+[Fine-tuning Explanation](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/tensorflow_explain.py)
+
+This was all about introduction of the frameworks now let's get back to the training.
+
+[Training using TensorFlow](https://github.com/aaliyanahmed1/ML-Guide/blob/main/tensorflow/training.py) - This is the sample practical implementation of training a model on custom dataset for object detection.
+
+---
+
+### Fine-Tuning Models for Custom Detections
+
+**Selecting models:** There are many state of the art object detection models that can be finetuned and integrated into applications. But there are some checks we need to see first before going ahead, e.g., License, Resources (Hardware), size and speed according to use case as we discussed earlier.
+
+**1: RF-DETR** by [Roboflow](https://roboflow.com/) is real-time transformer-based object detection model. It excels in both accuracy and speed, fit for most of the use case in application. It's licensed under Apache 2.0 so it can be used freely for commercial applications. It has variants that varies in speed and size to fit in with the environment.
+
+| Variant        | Size (MB) | Speed (ms/image) |
+| -------------- | --------- | ---------------- |
+| RF-DETR Nano   | ~15 MB    | 2.3              |
+| RF-DETR Small  | ~35 MB    | 3.5              |
+| RF-DETR Base   | ~45 MB    | 4.5              |
+| RF-DETR Large  | ~300 MB   | 6.5              |
+
+RF-DETR nano fits for integration in edge devices, mobile apps and real-time application where speed is crucial and low-memory is required.
+[RF-DETR-nano](https://github.com/aaliyanahmed1/ML-Guide/blob/main/RF-DETR_/rfdetr-nano.py)
+
+RF-DETR small is slightly bigger but still it's fast and good fit for real-time applications and performs best on GPUs.
+[RF-DETR-small](https://github.com/aaliyanahmed1/ML-Guide/blob/main/RF-DETR_/rfdetr-small.py)
+
+RF-DETR base is ideal for server inferences for real-time application deployments.
+[RF-DETR-base](https://github.com/aaliyanahmed1/ML-Guide/blob/main/RF-DETR_/rfdetrbase.py)
+
+RF-DETR Large is heavy-weight model best for high accuracies on GPUs. Ideal to use where accuracy is more crucial than speed. Not ideal for real-time systems.
+[RF-DETR-large](https://github.com/aaliyanahmed1/ML-Guide/blob/main/RF-DETR_/rfdetrlarge.py)
+
+For training RF-DETR on custom dataset first preprocess the dataset using Roboflow and then download it according to the RF-DETR format by selecting format in Roboflow then feed it into the code and then start training by defining which model you want to train. Let's have a hands on example of it at all.
+[FINE-TUNE-RF-DETR](https://github.com/aaliyanahmed1/ML-Guide/blob/main/RF-DETR_/train_rfdetr.py)
+
+**2: YOLO** by [Ultralytics](https://www.ultralytics.com/) commonly used model throughout best fit for real-time applications and fast easy to finetune. It takes image of 640x640 pixels as standard input. But it's not under Apache 2.0 license so it can't be used freely for commercial applications. You have to pay to the company.
+
+| Variant       | Size (MB) | Speed (ms/image) |
+| ------------- | --------- | ---------------- |
+| YOLO12 Nano   | ~14 MB    | 2.5              |
+| YOLO12 Small  | ~27 MB    | 3.8              |
+| YOLO12 Medium | ~44 MB    | 5.0              |
+| YOLO12 Large  | ~89 MB    | 8.0              |
+
+YOLO12n is ultralight and it's optimized for edge devices and real-time inferences can be used in applications where speed is required and hardware is small.
+[yolo12n_code](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Yolo_/YOLOS_/yolo12n_.py)
+
+YOLO12s is balanced with speed and accuracy performs well comparatively nano variant when integrated on the GPU based hardware.
+[yolo12s_code](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Yolo_/YOLOS_/yolo12s_.py)
+
+YOLO12m has significant accuracy difference from smaller ones and moderate speed ideal when deployed on server based inferences.
+[yolo12m_code](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Yolo_/YOLOS_/yolo12m_.py)
+
+YOLO12Large is high-speed model best for where precision is crucial more than speed. Mainly for medical imaging systems.
+[yolo12l_code](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Yolo_/YOLOS_/yolo12l_.py)
+
+[Fine-tuning YOLO](https://github.com/aaliyanahmed1/ML-Guide/blob/main/Yolo_/YOLOS_/training.py) - These are the simple implementations of the YOLO model variants for object detection tasks.
+
+**3: Fast R-CNN** by Microsoft Research is a two-stage detector object detection known for its precision and high accuracy. It's slightly slower than other single-stage detectors. Two-stage detector means first it processes ROI (region of interests) in the image and then classifies and refines bounding boxes for each region this process reduces the false positive and overlapping of objects. That's why mostly it's used where speed and accuracy both are required and mainly it can be seen deployed on medical imaging systems. And its variants are mainly the backbones it uses like CNNs layers (ResNet-50, ResNet-101, MobileNet) which cause difference in speed and accuracy.
+
+| Variant        | Backbone    | Size (MB) | Speed (ms/image) |
+| -------------- | ----------- | --------- | ---------------- |
+| Fast R-CNN 50  | ResNet-50   | ~120 MB   | 30               |
+| Fast R-CNN 101 | ResNet-101  | ~180 MB   | 45               |
+| Fast R-CNN M   | MobileNetV2 | ~60 MB    | 20               |
+
+ResNet-50: This backbone is balanced for speed and accuracy so where both are crucial then this would be ideal fit and commonly from Fast R-CNN this backbone is commonly used.
+[FastR-CNN-ResNet50](https://github.com/aaliyanahmed1/ML-Guide/blob/main/FasR-CNN_/fastrcnn_resnet50.py)
+
+ResNet-101: This has higher accuracy and slower inference so it should be integrated on precision mandatory applications.
+[FastR-CNN-ResNet101](https://github.com/aaliyanahmed1/ML-Guide/blob/main/FasR-CNN_/fastrcnn_resnet101.py)
+
+MobileNet: This variant is again lightweight faster but accuracy is compromised so not so ideal.
+[FastR-CNN_MobileNet](https://github.com/aaliyanahmed1/ML-Guide/blob/main/FasR-CNN_/fastrcnn_mobile.py)
+
+These are the mostly used object detection models for commercial enterprise applications, research works and medical analysis. And all of them have multiple use case centric variants having specialization for the specific task. We have discussed them and now just we will make a list of all the possible open source object detection models that are available for integration in production grade applications, research and development etc.
+
+---
+
+## Hugging Face
+
+**AI platform:** [Hugging Face](https://huggingface.co/) is AI platform that provides tools, datasets and pre-trained models for Machine learning tasks. It has its wide transformer library that offer multiple ready to use open source models. It's called models zoo where you can get any type of model for GenAI, Machine learning, Computer vision and Natural language processing etc.
+
+One of its most powerful feature is it provides inference API which allows to run models in cloud without setting up local environment, just using API for sending request and all the computation will be handled by Hugging Face. There are two ways to use it: 1) free API good for testing and personal use and 2) paid plan for large applications and faster responses.
+
+Example to use Hugging Face API for inference:
+```python
+import os
+from huggingface_hub import InferenceClient
+
+client = InferenceClient(
+    provider="hf-inference",
+    api_key=os.environ["HF_TOKEN"],
+)
+
+output = client.image_segmentation("cats.jpg", model="facebook/mask2former-swin-base-coco-panoptic")
+```
+
+### Transformers
+
+**Understanding transformers:** Transformers are type of deep learning architectures designed to handle sequential data using self-attention mechanisms instead of traditional or convolution. They excel at capturing long-range dependencies in data. Unlike older approaches that process sequences step by step, transformers compute relationships between all elements in a sequence simultaneously, allowing them to capture long-range dependencies. For our context we have to focus on ViTs (Vision Transformers).
+
+**Computer Vision Transformers**: They adapt this architecture to computer vision by splitting an image into small patches, treating each patch like word in a sentence and applying same attention mechanism to learn how different parts of the image relate to each other. Mainly used for image-to-text, text-to-image transformers for generating captions and images.
+
+**ViT (Vision Transformer)**: The first pure transformer for image classification, treating images as sequence of patches not as pixels.
+[ViTs](https://huggingface.co/google/vit-base-patch16-224-in21k); Hugging-Face.
+
+**Swin-Transformer**: It uses shifted window attention mechanism for efficient scaling to high-resolution images. It excels in segmentation, detection and classification.
+[swin](https://huggingface.co/keras-io/swin-transformers)
+
+**BLIP/BLIP-2**: A Vision language model for tasks like image captioning, VQA (Visual Question Answering) and retrieval. It takes images as input and generate its caption by defining what's happening inside the image. BLIP-2 improves the efficiency by using pre-trained language models for better reasoning over visual inputs. Patches understanding goes to language models and then they generate accurate caption.
+[Blip](https://huggingface.co/Salesforce/blip2-flan-t5-xxl)
+
+**Florence**: Large scale vision foundation model for various multimodal vision-language applications. It supports tasks such as image-text matching, captioning in enterprise and real-world production grade deployments.
+[florence](https://huggingface.co/microsoft/Florence-2-base)
+
+**Note**: These models like ViT, Swin-Transformer, BLIP/BLIP-2, and Florence are not ideal for real-time object detection on RTSP streams. They are mainly designed for high-accuracy image classification, vision-language tasks, and image captioning. These models typically require high-end GPUs with substantial memory (≥16 GB VRAM) for inference and fine-tuning, and are generally unsuitable for CPU-only or edge deployments.
+
+### Models from Hugging Face
+
+**Models for Object Detection with High Speed:**
+
+[Object detection models on Hugging Face](https://huggingface.co/models?pipeline_tag=object-detection&sort=trending)
+
+- **YOLOv4**
+  Balanced speed and accuracy; highly optimized for real-time detection tasks.
+  **Speed:** ~65 FPS (V100)
+  **Accuracy:** ~43.5% AP (COCO-dataset)
+  [Yolov4Tiny](https://huggingface.co/gbahlnxp/yolov4tiny)
+
+  **YOLO-S-Tiny**
+  [yolos-tiny](https://huggingface.co/hustvl/yolos-tiny)
+
+- **YOLOv7**
+  State-of-the-art real-time detection model with top-tier accuracy.
+  **Speed:** 30–160 FPS
+  **Accuracy:** ~56.8% AP (30+ FPS)
+  [Yolov7](https://huggingface.co/kadirnar/yolov7-tiny-v0.1)
+
+- **SSD (Single-Shot Detector)**
+  Lightweight single-stage detector suitable for real-time applications.
+  **Speed:** ~58 FPS
+  **Accuracy:** ~72.1% (Pascal VOC)
+
+- **EfficientDet (D0–D7)**
+  Scalable and efficient detectors with excellent COCO performance.
+  **Speed:** 30–50 FPS (varies by variant)
+  **Accuracy:** Up to ~55.1% AP (COCO)
+  [EfficientNet](https://huggingface.co/google/efficientnet-b7)
+
+- **RetinaNet**
+  One-stage detector with Focal Loss to handle class imbalance effectively.
+  **Speed:** ~30 FPS
+  **Accuracy:** High
+  [RetinaNet](https://huggingface.co/keras-io/Object-Detection-RetinaNet)
+
+- **RT-DETR (R50)**
+  Real-Time DETR optimized for fast inference.
+  **Speed:** 35 FPS
+  **Accuracy:** Good overall performance
+  [RT-DETR](https://huggingface.co/PekingU/rtdetr_r101vd_coco_o365)
+
+---
+
+### MLflow
+
+**Experiment tracking platform:** MLflow is an open-source platform, purpose-built to assist machine learning practitioners and teams handling the complexities of the machine learning process. MLflow focuses on the full lifecycle for machine learning projects ensuring that each phase is manageable, traceable and reproducible. MLflow provides comprehensive support for traditional machine learning and deep learning workflows. From experiment tracking and model versioning to deployment and monitoring, MLflow streamlines every aspect of ML lifecycles. Whether you're working with scikit-learn models, training deep neural networks, or managing complex ML pipelines, MLflow provides the tools you need to build reliable, scalable machine learning systems.
+
+**Core features**: MLflow Tracking provides comprehensive experiment logging, parameters tracking, metrics tracking, model versioning and artifact management.
+
+- Experiment Organization: Track and compare multiple models experiments
+- Metric Visualization: Built-in plots and charts for model performance
+- Artifact Storage: Store models, plots and other files each run
+- Collaboration: Share experiments and models with team members
+
+[MLflow implementations](https://github.com/aaliyanahmed1/ML-Guide/tree/main/MLFlow_)
+
+---
+
+## Deployment
+
+**Model deployment:** Deployment is very typical part of every Machine learning workflow. When it comes to deployment maintaining FPS for real-time systems becomes nightmare of MLOps architects so that's why the universal way to deploy model and maintain performance is to decouple it from training framework, that simplifies and reduces down burden of heavy dependencies and speed up the process is exporting model in ONNX (Open Neural Network Exchange) format. This simplifies integration of model and makes it compatible.
+
+### ONNX
+
+**Model format:** It is an open standard format for representing machine learning models. Exporting models to ONNX decouples them from the original training framework, making them easier to integrate into different platforms, whether on a server, multiple edge devices, or in the cloud. It ensures compatibility across various tools and allows optimized inference on different hardware setups, helping maintain real-time performance.
+
+### ONNX Runtime
+
+**Inference engine:** It is a high-performance inference engine designed to run ONNX models efficiently across different platforms. It takes the ONNX model and applies graph optimization, operator fusion and quantizations to reduce memory usage and computation time. So models run faster on servers, cloud environments and on multiple edge devices without needing original training framework. It can also speed up training process of large models by just making simple changes in code it can make training faster and efficient without changing workflow too much.
+
+[ONNX Runtime Docs](https://onnxruntime.ai/docs/get-started/with-python.html#install-onnx-runtime)
+
+[ONNX Runtime for Training](https://onnxruntime.ai/training)
